@@ -1,4 +1,11 @@
 [Version]
+1.2.2-b1
+[Desc]
+Added Kukuri Splash
+Fixed lag
+(/) Working on nodash debounce
+
+[Version]
 1.2.2
 [Desc]
 Fixed anti combo
