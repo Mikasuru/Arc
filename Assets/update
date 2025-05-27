@@ -1,13 +1,12 @@
 [Version]
+1.2.2-b2
+[Desc]
+Fixed no dash debounce shorter dash
+Included emote dash into no dash debounce
+
+[Version]
 1.2.2-b1
 [Desc]
 Added Kukuri Splash
 Fixed lag
 (/) Working on nodash debounce
-
-[Version]
-1.2.2
-[Desc]
-Fixed anti combo
-Added new theme
-Changed ui library to newer one
