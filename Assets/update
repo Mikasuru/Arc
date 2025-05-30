@@ -1,13 +1,11 @@
 [Version]
-1.2.2-b2
+1.2.2-b4
 [Desc]
-Fixed no dash debounce shorter dash
-Included emote dash into no dash debounce
-Redesigned splash banner
+(Check in Misc)
+Added Rejoin Button
+Added Join by JobId
 
 [Version]
-1.2.2-b1
+1.2.2-b3
 [Desc]
-Added Kukuri Splash
-Fixed lag
-(/) Working on nodash debounce
+Improved performance (Might take a little bit to load)
