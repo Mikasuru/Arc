@@ -132,41 +132,32 @@ local function playUiCloseAnimation(screenGui, mainFrame)
 end
 
 function KukuriLib:ToggleUI()
-    print("Library: ToggleUI CALLED.")
-    print("Library: mainScreenGuiInstance is:", mainScreenGuiInstance)
-    if mainScreenGuiInstance then
-        print("Library: mainScreenGuiInstance.Parent is:", mainScreenGuiInstance.Parent)
-        print("Library: mainScreenGuiInstance.Enabled is:", mainScreenGuiInstance.Enabled)
-    end
-
+    print("Library: ToggleUI CALLED (Simplified Test).")
     if not mainScreenGuiInstance or not mainScreenGuiInstance.Parent then
-        warn("KukuriLib: ToggleUI called but mainScreenGuiInstance or its parent is missing.")
-        if not mainScreenGuiInstance then warn("Library: mainScreenGuiInstance is NIL") end
-        if mainScreenGuiInstance and not mainScreenGuiInstance.Parent then warn("Library: mainScreenGuiInstance has NO PARENT") end
+        warn("KukuriLib: Simplified ToggleUI - mainScreenGuiInstance or parent missing.")
         return
     end
-    
     local mainFrame = mainScreenGuiInstance:FindFirstChild("MainFrame")
-    print("Library: mainFrame is:", mainFrame)
-    if mainFrame then
-         print("Library: mainFrame.Visible is:", mainFrame.Visible)
-    end
-
     if not mainFrame then
-        warn("KukuriLib: ToggleUI called but MainFrame not found.")
+        warn("KukuriLib: Simplified ToggleUI - MainFrame missing.")
         return
     end
 
-    print("Library: KukuriLib_isUiVisible BEFORE toggle is:", KukuriLib_isUiVisible)
-    if KukuriLib_isUiVisible then
-        playUiCloseAnimation(mainScreenGuiInstance, mainFrame)
-        KukuriLib_isUiVisible = false
+    if mainScreenGuiInstance.Enabled then
+        print("Library: Simplified ToggleUI - Disabling ScreenGui.")
+        mainScreenGuiInstance.Enabled = false
+        mainFrame.Visible = false
     else
-        playUiOpenAnimation(mainScreenGuiInstance, mainFrame)
-        KukuriLib_isUiVisible = true
+        print("Library: Simplified ToggleUI - Enabling ScreenGui.")
+        mainScreenGuiInstance.Enabled = true
+        mainFrame.Visible = true
+        mainFrame.Size = UDim2.new(0, 650, 0, 450)
+        mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        mainFrame.Rotation = 0
+        mainFrame.BackgroundTransparency = 0
     end
-    print("Library: KukuriLib_isUiVisible AFTER toggle is:", KukuriLib_isUiVisible)
 end
+
 
 local function SplashScreen(callbackAfterSplash)
     local Players = game:GetService("Players")
