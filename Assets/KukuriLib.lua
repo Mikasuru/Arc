@@ -592,16 +592,19 @@ local Colors = {
             sliderTextLabel.Font = Enum.Font.SourceSans
             sliderTextLabel.Parent = sliderFrame
 
-            local sliderTrackMaxSegmentHeight = 10
+            local sliderTrackMaxSegmentHeight = 10 
             local numSegments = 30 
-            local segmentVisualWidth = 2
+            local segmentVisualWidth = 2 
             local segmentVisualSpacing = 2 
-            local segmentMinHeightPixel = 3
+            local segmentMinHeightPixel = 3 
 
-            local handleVisualWidth = 3
-            local handleVisualHeight = sliderTrackMaxSegmentHeight + 2
+            local handleVisualWidth = 3 
+            local handleVisualHeight = sliderTrackMaxSegmentHeight + 2 
 
             local sliderTrackDrawingWidth = numSegments * segmentVisualWidth + (numSegments - 1) * segmentVisualSpacing
+
+            local animationUpdateIntervalFrames = 5 -- high = slow
+            local animationFrameCounter = 0
 
             local sliderTrackDisplay = Instance.new("Frame")
             sliderTrackDisplay.Name = "SliderTrackDisplay"
@@ -609,7 +612,7 @@ local Colors = {
             sliderTrackDisplay.Position = UDim2.new(1, -sliderTrackDrawingWidth - 15, 0.5, -(sliderTrackMaxSegmentHeight/2))
             sliderTrackDisplay.BackgroundTransparency = 1 
             sliderTrackDisplay.BorderSizePixel = 0
-            sliderTrackDisplay.ClipsDescendants = false
+            sliderTrackDisplay.ClipsDescendants = false 
             sliderTrackDisplay.Parent = sliderFrame
 
             local segments = {}
@@ -619,7 +622,7 @@ local Colors = {
                 local xPos = (i - 1) * (segmentVisualWidth + segmentVisualSpacing)
                 segment.Position = UDim2.new(0, xPos, 0.5, 0) 
                 segment.AnchorPoint = Vector2.new(0, 0.5) 
-                segment.BackgroundColor3 = Colors.SliderHandle
+                segment.BackgroundColor3 = Colors.SliderHandle 
                 segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel) 
                 segment.BorderSizePixel = 0
                 segment.Parent = sliderTrackDisplay
@@ -630,7 +633,7 @@ local Colors = {
             sliderHandleVisual.Name = "SliderHandleVisual"
             sliderHandleVisual.Size = UDim2.new(0, handleVisualWidth, 0, handleVisualHeight)
             sliderHandleVisual.AnchorPoint = Vector2.new(0.5, 0.5) 
-            sliderHandleVisual.BackgroundColor3 = Colors.SliderHandle
+            sliderHandleVisual.BackgroundColor3 = Colors.SliderHandle 
             sliderHandleVisual.BorderSizePixel = 0
             sliderHandleVisual.ZIndex = sliderTrackDisplay.ZIndex + 2 
             sliderHandleVisual.Parent = sliderTrackDisplay
@@ -652,7 +655,7 @@ local Colors = {
                     sliderHandleVisual.Position = UDim2.new(0, handleXPos, 0.5, 0)
                 end
                 
-                if callback then task.spawn(callback, currentValue) end
+                if callback then task.spawn(callback, currentValue) end 
             end
 
             local function animateSegmentHeights()
@@ -664,18 +667,24 @@ local Colors = {
                     return
                 end
 
+                animationFrameCounter = animationFrameCounter + 1
+                if animationFrameCounter < animationUpdateIntervalFrames then
+                    return
+                end
+                animationFrameCounter = 0
+
                 local percentage = (currentValue - min) / (max - min)
-                local numFilledThresholdPoint = percentage * numSegments
+                local numFilledThresholdPoint = percentage * numSegments 
 
                 for i, segment in ipairs(segments) do
                     if not segment or not segment.Parent then continue end
 
-                    if (i - 0.5) < numFilledThresholdPoint then
+                    if (i - 0.5) < numFilledThresholdPoint then 
                         segment.BackgroundColor3 = Colors.SliderFill
                         local randomHeight = math.random(segmentMinHeightPixel, sliderTrackMaxSegmentHeight)
                         segment.Size = UDim2.new(0, segmentVisualWidth, 0, randomHeight)
-                    else
-                        segment.BackgroundColor3 = Colors.SliderHandle
+                    else 
+                        segment.BackgroundColor3 = Colors.SliderHandle 
                         segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel)
                     end
                 end
@@ -711,8 +720,21 @@ local Colors = {
 
             updateSliderStateAndHandle(currentValue) 
             
+            local initialPercentage = (currentValue - min) / (max - min)
+            local initialNumFilledThresholdPoint = initialPercentage * numSegments
+            for i, segment in ipairs(segments) do
+                if not segment or not segment.Parent then continue end
+                if (i - 0.5) < initialNumFilledThresholdPoint then
+                    segment.BackgroundColor3 = Colors.SliderFill
+                    local randomHeight = math.random(segmentMinHeightPixel, sliderTrackMaxSegmentHeight)
+                    segment.Size = UDim2.new(0, segmentVisualWidth, 0, randomHeight)
+                else
+                    segment.BackgroundColor3 = Colors.SliderHandle
+                    segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel)
+                end
+            end
+            
             if not randomHeightAnimationConnection then
-                task.defer(animateSegmentHeights)
                 randomHeightAnimationConnection = game:GetService("RunService").RenderStepped:Connect(animateSegmentHeights)
             end
 
@@ -729,9 +751,9 @@ local Colors = {
                 SetValue = function(val) 
                     updateSliderStateAndHandle(val)
                 end,
-                Destroy = function()
+                Destroy = function() 
                     if sliderFrame and sliderFrame.Parent then
-                        sliderFrame:Destroy()
+                        sliderFrame:Destroy() 
                     end
                     if randomHeightAnimationConnection then 
                         randomHeightAnimationConnection:Disconnect()
