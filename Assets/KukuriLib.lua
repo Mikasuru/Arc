@@ -22,117 +22,138 @@ local function SplashScreen(callbackAfterSplash)
     end
 
     local splashScreenGui = Instance.new("ScreenGui")
-    splashScreenGui.Name = "KukuriSplashScreen"
+    splashScreenGui.Name = "KukuriCustomSplashScreen"
     splashScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
     splashScreenGui.ResetOnSpawn = false
     splashScreenGui.IgnoreGuiInset = true
     splashScreenGui.DisplayOrder = 1000
     
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainSplashFrame"
-    mainFrame.Size = UDim2.new(1, 0, 1, 0)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    mainFrame.BackgroundTransparency = 1
-    mainFrame.Parent = splashScreenGui
+    local mainContainer = Instance.new("Frame")
+    mainContainer.Name = "SplashContainer"
+    mainContainer.Size = UDim2.new(1, 0, 1, 0)
+    mainContainer.BackgroundTransparency = 1
+    mainContainer.Parent = splashScreenGui
 
+    local splashOverallSize = 250
+
+    local starContainer = Instance.new("Frame")
+    starContainer.Name = "StarContainer"
+    starContainer.Size = UDim2.new(0, splashOverallSize, 0, splashOverallSize)
+    starContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    starContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    starContainer.BackgroundTransparency = 1
+    starContainer.ClipsDescendants = false
+    starContainer.Parent = mainContainer
+
+    local starColor = Color3.fromRGB(40, 40, 45)
+    local starTransparencyStart = 1
+
+    local square1 = Instance.new("Frame")
+    square1.Name = "StarSquare1"
+    square1.Size = UDim2.new(0.7071, 0, 0.7071, 0)
+    
+    square1.AnchorPoint = Vector2.new(0.5, 0.5)
+    square1.Position = UDim2.new(0.5, 0, 0.5, 0)
+    square1.BackgroundColor3 = starColor
+    square1.BackgroundTransparency = starTransparencyStart
+    square1.BorderSizePixel = 0
+    square1.Parent = starContainer
+
+    local square2 = Instance.new("Frame")
+    square2.Name = "StarSquare2"
+    square2.Size = square1.Size
+    square2.AnchorPoint = Vector2.new(0.5, 0.5)
+    square2.Position = UDim2.new(0.5, 0, 0.5, 0)
+    square2.BackgroundColor3 = starColor
+    square2.BackgroundTransparency = starTransparencyStart
+    square2.BorderSizePixel = 0
+    square2.Rotation = 45
+    square2.Parent = starContainer
+
+    local cubeViewportSize = splashOverallSize * 0.5
     local viewportFrame = Instance.new("ViewportFrame")
     viewportFrame.Name = "CubeViewport"
-    viewportFrame.Size = UDim2.new(0, 150, 0, 150)
+    viewportFrame.Size = UDim2.new(0, cubeViewportSize, 0, cubeViewportSize)
     viewportFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    viewportFrame.Position = UDim2.new(0.5, 0, 0.45, 0)
+    viewportFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     viewportFrame.BackgroundTransparency = 1
     viewportFrame.Ambient = Color3.new(0.6, 0.6, 0.6)
     viewportFrame.LightColor = Color3.new(0.9, 0.9, 0.9)
-    viewportFrame.LightDirection = Vector3.new(0.6, -1, 0.4).Unit
-    viewportFrame.Parent = mainFrame
+    viewportFrame.LightDirection = Vector3.new(0.3, -0.8, 0.5).Unit
+    viewportFrame.ZIndex = 2
+    viewportFrame.Parent = starContainer
 
     local viewportCamera = Instance.new("Camera")
     viewportCamera.Parent = viewportFrame
     viewportFrame.CurrentCamera = viewportCamera
-    viewportCamera.CFrame = CFrame.new(Vector3.new(0, 0.5, 4.5), Vector3.new(0, 0, 0))
-    viewportCamera.FieldOfView = 40
+    viewportCamera.CFrame = CFrame.lookAt(Vector3.new(0, 1.5, 3.5), Vector3.new(0, 0, 0)) 
+    viewportCamera.FieldOfView = 30
 
     local worldModel = Instance.new("WorldModel")
     worldModel.Parent = viewportFrame
 
     local cube = Instance.new("Part")
     cube.Name = "SpinningCube"
-    cube.Size = Vector3.new(2.2, 2.2, 2.2)
+    cube.Size = Vector3.new(1.8, 1.8, 1.8)
     cube.Anchored = true
     cube.CanCollide = false
-    cube.Color = Color3.fromRGB(80, 160, 240)
-    cube.Material = Enum.Material.Neon
-    cube.CFrame = CFrame.new(0, 0, 0)
+    cube.Color = Color3.fromRGB(120, 180, 230)
+    cube.Material = Enum.Material.SmoothPlastic
+    cube.Reflectance = 0.1
+    cube.CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(20), math.rad(30), math.rad(10))
+    cube.Transparency = starTransparencyStart
     cube.Parent = worldModel
 
     local pointLight = Instance.new("PointLight")
-    pointLight.Brightness = 0.7
-    pointLight.Color = Color3.new(1,1,1)
-    pointLight.Range = 9
+    pointLight.Brightness = 0.6
+    pointLight.Color = Color3.fromRGB(220,220,255)
+    pointLight.Range = 7
     pointLight.Parent = cube
 
-    local loadingLabel = Instance.new("TextLabel")
-    loadingLabel.Name = "LoadingText"
-    loadingLabel.Size = UDim2.new(0, 220, 0, 35)
-    loadingLabel.AnchorPoint = Vector2.new(0.5, 0)
-    loadingLabel.Position = UDim2.new(0.5, 0, 0.65, 0)
-    loadingLabel.BackgroundTransparency = 1
-    loadingLabel.Text = "Loading..."
-    loadingLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-    loadingLabel.TextSize = 26
-    loadingLabel.Font = Enum.Font.GothamSemibold
-    loadingLabel.TextStrokeTransparency = 0.5
-    loadingLabel.TextStrokeColor3 = Color3.fromRGB(0,0,0)
-    loadingLabel.Parent = mainFrame
-
-    local rotationSpeed = math.rad(135)
+    local rotationAngle = 0
+    local rotationAxis = Vector3.new(0.5, 1, 0.2).Unit
+    local rotationSpeed = math.rad(45)
     local cubeRotationConnection
     cubeRotationConnection = RunService.RenderStepped:Connect(function(deltaTime)
         if cube and cube.Parent then
-            cube.CFrame = cube.CFrame * 
-                          CFrame.Angles(0, rotationSpeed * deltaTime, 0) * 
-                          CFrame.Angles(rotationSpeed * deltaTime * 0.2, 0, 0) *
-                          CFrame.Angles(0,0, rotationSpeed * deltaTime * 0.1) 
+            rotationAngle = rotationAngle + rotationSpeed * deltaTime
+            cube.CFrame = CFrame.fromAxisAngle(rotationAxis, rotationAngle) * CFrame.Angles(math.rad(20), math.rad(30), math.rad(10))
         else
-            if cubeRotationConnection then
-                cubeRotationConnection:Disconnect()
-                cubeRotationConnection = nil
-            end
+            if cubeRotationConnection then cubeRotationConnection:Disconnect(); cubeRotationConnection = nil end
         end
     end)
 
     splashScreenGui.Parent = CoreGui
 
-    local fadeInTween = TweenService:Create(mainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {BackgroundTransparency = 0})
-    local fadeInLabelTween = TweenService:Create(loadingLabel, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {TextTransparency = 0})
-    loadingLabel.TextTransparency = 1
+    local tweenInfoFade = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     
-    fadeInTween:Play()
-    fadeInLabelTween:Play()
+    local square1FadeIn = TweenService:Create(square1, tweenInfoFade, {BackgroundTransparency = 0})
+    local square2FadeIn = TweenService:Create(square2, tweenInfoFade, {BackgroundTransparency = 0})
+    local cubeFadeIn = TweenService:Create(cube, tweenInfoFade, {Transparency = 0})
     
-    fadeInTween.Completed:Wait()
+    square1FadeIn:Play()
+    square2FadeIn:Play()
+    cubeFadeIn:Play()
+    
+    square1FadeIn.Completed:Wait()
 
     task.wait(SplashTime)
 
-    local fadeOutTween = TweenService:Create(mainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {BackgroundTransparency = 1})
-    local fadeOutLabelTween = TweenService:Create(loadingLabel, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {TextTransparency = 1})
-    
-    fadeOutTween:Play()
-    fadeOutLabelTween:Play()
+    local tweenInfoFadeOut = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local square1FadeOut = TweenService:Create(square1, tweenInfoFadeOut, {BackgroundTransparency = 1})
+    local square2FadeOut = TweenService:Create(square2, tweenInfoFadeOut, {BackgroundTransparency = 1})
+    local cubeFadeOut = TweenService:Create(cube, tweenInfoFadeOut, {Transparency = 1})
 
-    fadeOutTween.Completed:Wait()
+    square1FadeOut:Play()
+    square2FadeOut:Play()
+    cubeFadeOut:Play()
+
+    square1FadeOut.Completed:Wait()
     
-    if cubeRotationConnection then
-        cubeRotationConnection:Disconnect()
-        cubeRotationConnection = nil
-    end
-    if splashScreenGui and splashScreenGui.Parent then
-        splashScreenGui:Destroy()
-    end
+    if cubeRotationConnection then cubeRotationConnection:Disconnect(); cubeRotationConnection = nil end
+    if splashScreenGui and splashScreenGui.Parent then splashScreenGui:Destroy() end
     
-    if callbackAfterSplash then
-        task.defer(callbackAfterSplash)
-    end
+    if callbackAfterSplash then task.defer(callbackAfterSplash) end
 end
 
 local Colors = {
