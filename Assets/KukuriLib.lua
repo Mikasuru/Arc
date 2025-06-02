@@ -327,6 +327,17 @@ function KukuriLib:CreateWindow(title, subtitle)
             dragging = false
         end
     end)
+
+    local uiToggleConnection
+        uiToggleConnection = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+        if gameProcessedEvent then
+            return
+        end
+
+        if input.KeyCode == Enum.KeyCode.LeftControl then
+            screenGui.Enabled = not screenGui.Enabled
+        end
+    end)
     
     window.ScreenGui = screenGui
     window.MainFrame = mainFrame
@@ -1062,6 +1073,24 @@ function KukuriLib:CreateWindow(title, subtitle)
         end
         
         return tab
+    end
+
+    function window:Show()
+        if not self.ScreenGui.Parent then
+            self.ScreenGui.Parent = CoreGui
+        end
+        self.ScreenGui.Enabled = true
+    end
+
+    function window:Hide()
+        self.ScreenGui.Enabled = false
+    end
+
+    function window:Toggle()
+        if not self.ScreenGui.Parent then
+            self.ScreenGui.Parent = CoreGui
+        end
+        self.ScreenGui.Enabled = not self.ScreenGui.Enabled
     end
     
     return window
