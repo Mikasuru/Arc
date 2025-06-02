@@ -282,17 +282,33 @@ local Colors = {
             hoverStroke.Enabled = false
             hoverStroke.Parent = buttonFrame
 
-            local iconSize = 10
-            local iconPadding = 10
-            local spaceAfterIcon = 5
+            local arrowIconSize = 10
+            local arrowIconPadding = 5
+            
+            local hoverArrowIcon = Instance.new("ImageLabel")
+            hoverArrowIcon.Name = "HoverArrowIcon"
+            hoverArrowIcon.Size = UDim2.new(0, arrowIconSize, 0, arrowIconSize)
+            hoverArrowIcon.AnchorPoint = Vector2.new(0, 0.5)
+            hoverArrowIcon.Position = UDim2.new(0, arrowIconPadding, 0.5, 0)
+            hoverArrowIcon.BackgroundTransparency = 1
+            hoverArrowIcon.Image = "rbxassetid://1018430113"
+            hoverArrowIcon.ImageColor3 = Colors.ContentItemIconHover
+            hoverArrowIcon.Visible = false
+            hoverArrowIcon.ZIndex = 2
+            hoverArrowIcon.Parent = buttonFrame
+
+            local squareIconSize = 10
+            local squareIconPadding = arrowIconPadding + arrowIconSize + 3
+            local spaceAfterSquareIcon = 5
 
             local buttonIcon = Instance.new("Frame")
             buttonIcon.Name = "ButtonIcon"
-            buttonIcon.Size = UDim2.new(0, iconSize, 0, iconSize)
+            buttonIcon.Size = UDim2.new(0, squareIconSize, 0, squareIconSize)
             buttonIcon.AnchorPoint = Vector2.new(0, 0.5)
-            buttonIcon.Position = UDim2.new(0, iconPadding, 0.5, 0)
+            buttonIcon.Position = UDim2.new(0, squareIconPadding, 0.5, 0)
             buttonIcon.BackgroundColor3 = Colors.ContentItemIcon
             buttonIcon.BorderSizePixel = 0
+            buttonIcon.ZIndex = 1
             buttonIcon.Parent = buttonFrame
             
             local actualButton = Instance.new("TextButton")
@@ -309,13 +325,12 @@ local Colors = {
             actualButton.Parent = buttonFrame
             
             local textPadding = Instance.new("UIPadding")
-
-            textPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon) 
+            textPadding.PaddingLeft = UDim.new(0, squareIconPadding + squareIconSize + spaceAfterSquareIcon)
             textPadding.Parent = actualButton
 
             local originalBackgroundColor = buttonFrame.BackgroundColor3
             local originalTextColor = actualButton.TextColor3
-            local originalIconColor = buttonIcon.BackgroundColor3
+            local originalSquareIconColor = buttonIcon.BackgroundColor3
             local originalSize = buttonFrame.Size
 
             local isHovering = false
@@ -323,6 +338,7 @@ local Colors = {
 
             actualButton.MouseEnter:Connect(function()
                 isHovering = true
+                hoverArrowIcon.Visible = true
                 if not isPressed then
                     TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
                     TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
@@ -333,10 +349,11 @@ local Colors = {
             
             actualButton.MouseLeave:Connect(function()
                 isHovering = false
+                hoverArrowIcon.Visible = false
                 if not isPressed then
                     TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalBackgroundColor}):Play()
                     TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = originalTextColor}):Play()
-                    TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = originalIconColor}):Play()
+                    TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = originalSquareIconColor}):Play()
                     hoverStroke.Enabled = false
                     TweenService:Create(buttonFrame, TweenInfo.new(0.1), {Size = originalSize}):Play()
                 end
@@ -344,6 +361,7 @@ local Colors = {
 
             actualButton.MouseButton1Down:Connect(function()
                 isPressed = true
+                hoverArrowIcon.Visible = true
                 local newSize = UDim2.new(originalSize.X.Scale * 0.97, originalSize.X.Offset * 0.97, 
                                           originalSize.Y.Scale * 0.97, originalSize.Y.Offset * 0.97)
                 TweenService:Create(buttonFrame, TweenInfo.new(0.05), {Size = newSize}):Play()
@@ -359,14 +377,16 @@ local Colors = {
                 TweenService:Create(buttonFrame, TweenInfo.new(0.05), {Size = originalSize}):Play()
 
                 if isHovering then
+                    hoverArrowIcon.Visible = true
                     TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
                     TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = Colors.LightText}):Play()
                     TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
                     hoverStroke.Enabled = true
                 else
+                    hoverArrowIcon.Visible = false
                     TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = originalBackgroundColor}):Play()
                     TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = originalTextColor}):Play()
-                    TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = originalIconColor}):Play()
+                    TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = originalSquareIconColor}):Play()
                     hoverStroke.Enabled = false
                 end
             end)
