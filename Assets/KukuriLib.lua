@@ -603,7 +603,7 @@ local Colors = {
 
             local sliderTrackDrawingWidth = numSegments * segmentVisualWidth + (numSegments - 1) * segmentVisualSpacing
 
-            local animationUpdateIntervalFrames = 5 -- high = slow
+            local animationUpdateIntervalFrames = 10 -- high = slow
             local animationFrameCounter = 0
 
             local sliderTrackDisplay = Instance.new("Frame")
