@@ -36,7 +36,7 @@ local function playUiOpenAnimation(screenGui, mainFrame)
     end
     
     local mainFrameTween = TweenService:Create(mainFrame, 
-        TweenInfo.new(OPEN_ANIM_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
+        TweenInfo.new(OpenAnim, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
         {
             Size = UDim2.new(0, 650, 0, 450),
             BackgroundTransparency = mainFrame:GetAttribute("OriginalTransparency") or 0,
@@ -69,7 +69,7 @@ local function playUiOpenAnimation(screenGui, mainFrame)
         end
         
         TweenService:Create(child, 
-            TweenInfo.new(OPEN_ANIM_DURATION * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+            TweenInfo.new(OpenAnim * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
             {
                 Position = originalPosition,
                 Transparency = 0
@@ -106,7 +106,7 @@ local function playUiCloseAnimation(screenGui, mainFrame)
         end
 
         TweenService:Create(child, 
-            TweenInfo.new(CLOSE_ANIM_DURATION * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+            TweenInfo.new(CloseAnim * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
             {
                 Position = targetPosition,
                 Transparency = 1
@@ -115,10 +115,10 @@ local function playUiCloseAnimation(screenGui, mainFrame)
         task.wait(0.03)
     end
     
-    task.wait(CLOSE_ANIM_DURATION * 0.4)
+    task.wait(CloseAnim * 0.4)
 
     local mainFrameTween = TweenService:Create(mainFrame, 
-        TweenInfo.new(CLOSE_ANIM_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.In), 
+        TweenInfo.new(CloseAnim, Enum.EasingStyle.Quart, Enum.EasingDirection.In), 
         {
             Size = UDim2.new(0, mainFrame.AbsoluteSize.X * 0.2, 0, mainFrame.AbsoluteSize.Y * 0.2),
             BackgroundTransparency = 1,
