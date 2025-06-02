@@ -268,10 +268,14 @@ local Colors = {
             buttonFrame.BorderSizePixel = 0
             buttonFrame.Parent = tab.UI
             
+            local iconSize = 10 -- ขนาดของไอคอน
+            local iconPadding = 10 -- ระยะห่างระหว่างขอบกับไอคอน
+            local spaceAfterIcon = 5 -- ระยะห่างระหว่างไอคอนกับข้อความ
+
             local buttonIcon = Instance.new("Frame")
             buttonIcon.Name = "ButtonIcon"
-            buttonIcon.Size = UDim2.new(0, 10, 0, 10)
-            buttonIcon.Position = UDim2.new(0, 10, 0.5, -5)
+            buttonIcon.Size = UDim2.new(0, iconSize, 0, iconSize)
+            buttonIcon.Position = UDim2.new(0, iconPadding, 0.5, -(iconSize/2)) -- จัดกึ่งกลางแนวตั้ง
             buttonIcon.BackgroundColor3 = Colors.ContentItemIcon
             buttonIcon.BorderSizePixel = 0
             buttonIcon.Parent = buttonFrame
@@ -281,17 +285,20 @@ local Colors = {
             actualButton.Size = UDim2.new(1, 0, 1, 0)
             actualButton.Position = UDim2.new(0,0,0,0)
             actualButton.BackgroundTransparency = 1
-            actualButton.Text = "  " .. text
+            actualButton.Text = text
             actualButton.TextColor3 = Colors.DarkText
             actualButton.TextSize = 14
             actualButton.TextXAlignment = Enum.TextXAlignment.Left
             actualButton.TextWrapped = true
             actualButton.Font = Enum.Font.SourceSans
             actualButton.Parent = buttonFrame
-            actualButton.TextXOffset = 25 
-    
+
+            local textPadding = Instance.new("UIPadding")
+            textPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon)
+            textPadding.Parent = actualButton
+
             actualButton.MouseEnter:Connect(function()
-                if TweenService and Colors and Colors.SliderTrack then 
+                if TweenService and Colors and Colors.SliderTrack then
                     TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.SliderTrack}):Play()
                 end
             end)
