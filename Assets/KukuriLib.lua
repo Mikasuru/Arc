@@ -20,7 +20,10 @@ local Colors = {
     UnselectedTabIcon = Color3.fromRGB(80, 80, 80),
     
     ContentItemBackground = Color3.fromRGB(235, 230, 220),
+    ContentItemHoverBackground = Color3.fromRGB(60, 55, 50),
+    ContentItemHoverBorder = Color3.fromRGB(218, 213, 202),
     ContentItemIcon = Color3.fromRGB(70, 70, 70),
+    ContentItemIconHover = Color3.fromRGB(255, 255, 255),
     
     SliderTrack = Color3.fromRGB(205, 200, 190),
     SliderFill = Color3.fromRGB(100, 95, 90),
@@ -266,16 +269,24 @@ local Colors = {
             buttonFrame.Size = UDim2.new(1, 0, 0, 35)
             buttonFrame.BackgroundColor3 = Colors.ContentItemBackground
             buttonFrame.BorderSizePixel = 0
+            buttonFrame.ClipsDescendants = true
             buttonFrame.Parent = tab.UI
             
-            local iconSize = 10 -- ขนาดของไอคอน
-            local iconPadding = 10 -- ระยะห่างระหว่างขอบกับไอคอน
-            local spaceAfterIcon = 5 -- ระยะห่างระหว่างไอคอนกับข้อความ
+            local hoverStroke = Instance.new("UIStroke")
+            hoverStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            hoverStroke.Color = Colors.ContentItemHoverBorder
+            hoverStroke.Thickness = 1
+            hoverStroke.Enabled = false
+            hoverStroke.Parent = buttonFrame
+
+            local iconSize = 10
+            local iconPadding = 10
+            local spaceAfterIcon = 5
 
             local buttonIcon = Instance.new("Frame")
             buttonIcon.Name = "ButtonIcon"
             buttonIcon.Size = UDim2.new(0, iconSize, 0, iconSize)
-            buttonIcon.Position = UDim2.new(0, iconPadding, 0.5, -(iconSize/2)) -- จัดกึ่งกลางแนวตั้ง
+            buttonIcon.Position = UDim2.new(0, iconPadding, 0.5, -(iconSize/2))
             buttonIcon.BackgroundColor3 = Colors.ContentItemIcon
             buttonIcon.BorderSizePixel = 0
             buttonIcon.Parent = buttonFrame
@@ -292,23 +303,32 @@ local Colors = {
             actualButton.TextWrapped = true
             actualButton.Font = Enum.Font.SourceSans
             actualButton.Parent = buttonFrame
-
+            
             local textPadding = Instance.new("UIPadding")
             textPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon)
             textPadding.Parent = actualButton
 
+            local originalBackgroundColor = buttonFrame.BackgroundColor3
+            local originalTextColor = actualButton.TextColor3
+            local originalIconColor = buttonIcon.BackgroundColor3
+
             actualButton.MouseEnter:Connect(function()
-                if TweenService and Colors and Colors.SliderTrack then
-                    TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.SliderTrack}):Play()
-                end
+                TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
+                TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                hoverStroke.Enabled = true
             end)
+            
             actualButton.MouseLeave:Connect(function()
-                if TweenService and Colors and Colors.ContentItemBackground then
-                    TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.ContentItemBackground}):Play()
-                end
+                TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalBackgroundColor}):Play()
+                TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = originalTextColor}):Play()
+                TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = originalIconColor}):Play()
+                hoverStroke.Enabled = false
             end)
+            
             actualButton.MouseButton1Click:Connect(function()
                 if callback then pcall(callback) end
+                    
             end)
             return actualButton
         end
