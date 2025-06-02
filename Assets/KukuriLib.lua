@@ -94,7 +94,7 @@ local function SplashScreen(callbackAfterSplash)
 
     local cube = Instance.new("Part")
     cube.Name = "SpinningCube"
-    cube.Size = Vector3.new(1.2, 1.2, 1.2)
+    cube.Size = Vector3.new(1.0, 1.0, 1.0)
     cube.Anchored = true
     cube.CanCollide = false
     cube.Color = Color3.fromRGB(120, 180, 230)
