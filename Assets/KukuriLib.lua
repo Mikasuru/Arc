@@ -374,8 +374,8 @@ function KukuriLib:CreateWindow(title, subtitle)
             self.ScreenGui.Parent = CoreGui
         end
         self.ScreenGui.Enabled = true
-        self.MainFrame.BackgroundTransparency = 1
-        self.MainFrame.Visible = false
+        self.MainFrame.BackgroundTransparency = 0
+        self.MainFrame.Visible = true
 
         local animContainer = Instance.new("Frame")
         animContainer.Name = "AnimationPanelContainer"
