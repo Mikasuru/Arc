@@ -87,8 +87,14 @@ local function SplashScreen(callbackAfterSplash)
     local viewportCamera = Instance.new("Camera")
     viewportCamera.Parent = viewportFrame
     viewportFrame.CurrentCamera = viewportCamera
-    viewportCamera.CFrame = CFrame.lookAt(Vector3.new(0, 1.5, 3.5), Vector3.new(0, 0, 0)) 
-    viewportCamera.FieldOfView = 30
+    
+    if viewportFrame then
+        local cameraPosition = Vector3.new(0, 1.5, 3.5)
+        local lookAtPosition = Vector3.new(0, 0, 0)
+        
+        viewportCamera.CFrame = CFrame.new(cameraPosition, lookAtPosition)
+        viewportCamera.FieldOfView = 30
+    end
 
     local worldModel = Instance.new("WorldModel")
     worldModel.Parent = viewportFrame
