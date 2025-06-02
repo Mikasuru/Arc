@@ -45,7 +45,7 @@ local function SplashScreen(callbackAfterSplash)
     starContainer.ClipsDescendants = false
     starContainer.Parent = mainContainer
 
-    local starColor = Color3.fromRGB(228, 223, 212)
+    local starColor = Color3.fromRGB(60, 55, 50)
     local starTransparencyStart = 1
 
     local square1 = Instance.new("Frame")
@@ -97,7 +97,7 @@ local function SplashScreen(callbackAfterSplash)
     cube.Size = Vector3.new(1.0, 1.0, 1.0)
     cube.Anchored = true
     cube.CanCollide = false
-    cube.Color = Color3.fromRGB(60, 55, 50)
+    cube.Color = Color3.fromRGB(228, 223, 212)
     cube.Material = Enum.Material.SmoothPlastic
     cube.Reflectance = 0.1
     cube.CFrame = CFrame.new(0, 0, 0) * CFrame.Angles(math.rad(20), math.rad(30), math.rad(10))
