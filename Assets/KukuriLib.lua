@@ -132,17 +132,32 @@ local function playUiCloseAnimation(screenGui, mainFrame)
 end
 
 function KukuriLib:ToggleUI()
+    print("Library: ToggleUI CALLED.")
+    print("Library: mainScreenGuiInstance is:", mainScreenGuiInstance)
+    if mainScreenGuiInstance then
+        print("Library: mainScreenGuiInstance.Parent is:", mainScreenGuiInstance.Parent)
+        print("Library: mainScreenGuiInstance.Enabled is:", mainScreenGuiInstance.Enabled)
+    end
+
     if not mainScreenGuiInstance or not mainScreenGuiInstance.Parent then
         warn("KukuriLib: ToggleUI called but mainScreenGuiInstance or its parent is missing.")
+        if not mainScreenGuiInstance then warn("Library: mainScreenGuiInstance is NIL") end
+        if mainScreenGuiInstance and not mainScreenGuiInstance.Parent then warn("Library: mainScreenGuiInstance has NO PARENT") end
         return
     end
     
     local mainFrame = mainScreenGuiInstance:FindFirstChild("MainFrame")
+    print("Library: mainFrame is:", mainFrame)
+    if mainFrame then
+         print("Library: mainFrame.Visible is:", mainFrame.Visible)
+    end
+
     if not mainFrame then
         warn("KukuriLib: ToggleUI called but MainFrame not found.")
         return
     end
 
+    print("Library: KukuriLib_isUiVisible BEFORE toggle is:", KukuriLib_isUiVisible)
     if KukuriLib_isUiVisible then
         playUiCloseAnimation(mainScreenGuiInstance, mainFrame)
         KukuriLib_isUiVisible = false
@@ -150,6 +165,7 @@ function KukuriLib:ToggleUI()
         playUiOpenAnimation(mainScreenGuiInstance, mainFrame)
         KukuriLib_isUiVisible = true
     end
+    print("Library: KukuriLib_isUiVisible AFTER toggle is:", KukuriLib_isUiVisible)
 end
 
 local function SplashScreen(callbackAfterSplash)
@@ -343,6 +359,7 @@ local Colors = {
         screenGui.Enabled = false
 
         mainScreenGuiInstance = screenGui
+        print("Library: CreateWindow - mainScreenGuiInstance SET TO:", mainScreenGuiInstance, "Name:", mainScreenGuiInstance.Name)
         
         local mainFrame = Instance.new("Frame")
         mainFrame.Name = "MainFrame"
