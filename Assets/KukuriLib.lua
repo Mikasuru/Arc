@@ -374,8 +374,8 @@ function KukuriLib:CreateWindow(title, subtitle)
             self.ScreenGui.Parent = CoreGui
         end
         self.ScreenGui.Enabled = true
-        self.MainFrame.BackgroundTransparency = 0
-        self.MainFrame.Visible = true
+        self.MainFrame.BackgroundTransparency = 1
+        self.MainFrame.Visible = false
 
         local animContainer = Instance.new("Frame")
         animContainer.Name = "AnimationPanelContainer"
@@ -434,7 +434,9 @@ function KukuriLib:CreateWindow(title, subtitle)
             
             panelTween.Completed:Connect(function()
                 allPanelTweensCompleted = allPanelTweensCompleted + 1
+                print("Panel " .. panel.Name .. " completed. Total completed: " .. allPanelTweensCompleted .. "/" .. tweensToWaitFor)
                 if allPanelTweensCompleted >= tweensToWaitFor then
+                    print("All panels completed! Showing main UI.")
                     self.MainFrame.Visible = true
                     local mainUITweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear)
                     local mainUITween = TweenService:Create(self.MainFrame, mainUITweenInfo, {BackgroundTransparency = 0})
