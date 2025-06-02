@@ -603,7 +603,7 @@ local Colors = {
 
             local sliderTrackDrawingWidth = numSegments * segmentVisualWidth + (numSegments - 1) * segmentVisualSpacing
 
-            local animationUpdateIntervalFrames = 50 -- high = slow
+            local animationUpdateIntervalFrames = 15 -- high = slow
             print("KukuriLib Slider Interval:", animationUpdateIntervalFrames)
             local animationFrameCounter = 0
 
