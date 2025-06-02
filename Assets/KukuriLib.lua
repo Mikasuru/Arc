@@ -8,7 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 local SplashTime = 3
-local uiToggleKey = Enum.KeyCode.RightShift
+local uiToggleKey = Enum.KeyCode.LeftCtrl
 local mainScreenGuiInstance = nil
 
 local OPEN_ANIM_DURATION = 0.5 
