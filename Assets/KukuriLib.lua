@@ -117,9 +117,12 @@ local function SplashScreen(callbackAfterSplash)
 
     local pleaseWaitLabel = Instance.new("TextLabel")
     pleaseWaitLabel.Name = "PleaseWaitLabel"
-    pleaseWaitLabel.Size = UDim2.new(1, 0, 0, 30)
-    pleaseWaitLabel.Position = UDim2.new(0, 0, 0.5, splashOverallSize * 0.5 + 20)
-    pleaseWaitLabel.AnchorPoint = Vector2.new(0.5, 0)
+    pleaseWaitLabel.Size = UDim2.new(0, 300, 0, 30)
+    pleaseWaitLabel.Position = UDim2.new(
+        0.5, 0,
+        0.5, starBottomYOffset + labelOffsetY + labelHeightHalf
+    )
+    pleaseWaitLabel.AnchorPoint = Vector2.new(0.5, 0.5)
     pleaseWaitLabel.BackgroundTransparency = 1
     pleaseWaitLabel.Text = "PLEASE WAIT..."
     pleaseWaitLabel.Font = Enum.Font.SourceSansSemibold 
@@ -130,6 +133,11 @@ local function SplashScreen(callbackAfterSplash)
     pleaseWaitLabel.ZIndex = starContainer.ZIndex + 1 
     pleaseWaitLabel.Parent = mainContainer
 
+    local starBottomYOffset = splashOverallSize * 0.5
+    local labelOffsetY = 15
+    local labelHeightHalf = pleaseWaitLabel.Size.Y.Offset * 0.5
+    
+    
     local rotationAngle = 0
     local rotationAxis = Vector3.new(0.5, 1, 0.2).Unit
     local rotationSpeed = math.rad(120)
