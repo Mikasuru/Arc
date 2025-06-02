@@ -196,7 +196,6 @@ local Colors = {
         
         local screenGui = Instance.new("ScreenGui")
         screenGui.Name = "KukuriLib_Redesigned"
-        --screenGui.Parent = CoreGui
         screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         screenGui.ResetOnSpawn = false
         screenGui.Enabled = true
@@ -209,11 +208,11 @@ local Colors = {
         mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         mainFrame.BackgroundColor3 = Colors.TabContainerBackground 
-        mainFrame.BackgroundTransparency = 1
+        mainFrame.BackgroundTransparency = 0
         mainFrame.BorderSizePixel = 1
         mainFrame.BorderColor3 = Colors.MainFrameOuterBorder
         mainFrame.ClipsDescendants = true
-        mainFrame.Visible = false
+        mainFrame.Visible = true
         mainFrame.Parent = screenGui
         
         local titleBar = Instance.new("Frame")
@@ -251,7 +250,9 @@ local Colors = {
         tabContainer.BackgroundColor3 = Colors.TabContainerBackground
         tabContainer.BorderSizePixel = 0
         tabContainer.Parent = mainFrame
-        
+        tabContainer.Visible = true
+        tabContainer.Transparency = 0
+    
         local tabListLayout = Instance.new("UIListLayout")
         tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         tabListLayout.FillDirection = Enum.FillDirection.Vertical
@@ -265,7 +266,9 @@ local Colors = {
         contentFrame.BackgroundColor3 = Colors.MainBackground
         contentFrame.BorderSizePixel = 0
         contentFrame.Parent = mainFrame
-        
+        contentFrame.Visible = true
+        contentFrame.Transparency = 0
+    
         local tabTitleLabel = Instance.new("TextLabel")
         tabTitleLabel.Name = "TabTitleLabel"
         tabTitleLabel.Size = UDim2.new(1, -20, 0, 40)
