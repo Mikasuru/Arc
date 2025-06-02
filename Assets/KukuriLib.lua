@@ -342,7 +342,7 @@ local Colors = {
         window.CurrentTabContent = nil
         window.Tabs = {}
         
-        function window:CreateTab(name)
+                function window:CreateTab(name)
             local tab = {}
             local tabNameUpper = name:upper()
             
@@ -355,12 +355,13 @@ local Colors = {
             tabButton.Parent = self.TabContainer
             tabButton.AutoButtonColor = false
 
+            -- SciFiIndicator: Will act as the left border for the active tab
             local sciFiIndicator = Instance.new("Frame")
             sciFiIndicator.Name = "SciFiIndicator"
-            sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)
+            sciFiIndicator.Size = UDim2.new(0, 4, 1, 0) -- Full height, 4px wide
             sciFiIndicator.AnchorPoint = Vector2.new(0, 0.5)
-            sciFiIndicator.Position = UDim2.new(0, -4, 0.5, 0)
-            sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary
+            sciFiIndicator.Position = UDim2.new(0, -4, 0.5, 0) -- Initially hidden by being off-screen left
+            sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary -- Color for active state
             sciFiIndicator.BorderSizePixel = 0
             sciFiIndicator.ZIndex = tabButton.ZIndex + 2
             sciFiIndicator.Parent = tabButton
@@ -369,7 +370,7 @@ local Colors = {
             tabIcon.Name = "TabIcon"
             tabIcon.Size = UDim2.new(0, 12, 0, 12)
             tabIcon.AnchorPoint = Vector2.new(0, 0.5)
-            tabIcon.Position = UDim2.new(0, 15, 0.5, 0)
+            tabIcon.Position = UDim2.new(0, 15, 0.5, 0) -- Positioned after where the indicator might be
             tabIcon.BorderSizePixel = 0
             tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
             tabIcon.ZIndex = tabButton.ZIndex + 1
@@ -394,7 +395,7 @@ local Colors = {
             bottomBorder.Position = UDim2.new(0,0,1,-1)
             bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
             bottomBorder.BorderSizePixel = 0
-            bottomBorder.ZIndex = tabButton.ZIndex
+            bottomBorder.ZIndex = tabButton.ZIndex -- Below icon/text/indicator
             bottomBorder.Parent = tabButton
             
             local tabContent = Instance.new("Frame")
@@ -429,13 +430,16 @@ local Colors = {
             local function selectThisTab()
                 for _, t_info in pairs(self.Tabs) do
                     t_info.content.Visible = false
+                    -- Style for INACTIVE tabs
                     TweenService:Create(t_info.button, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabBackground}):Play()
                     TweenService:Create(t_info.label, tweenInfoFast, {TextColor3 = Colors.UnselectedTabText}):Play()
                     TweenService:Create(t_info.icon, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabIcon}):Play()
                     
-                    t_info.indicator.BackgroundColor3 = Colors.DarkPrimary
+                    -- Hide indicator for inactive tabs
+                    t_info.indicator.BackgroundColor3 = Colors.DarkPrimary -- Keep color consistent even if hidden
                     TweenService:Create(t_info.indicator, tweenInfoMedium, {
-                        Position = UDim2.new(0, -t_info.indicator.Size.X.Offset, 0.5, 0)
+                        Position = UDim2.new(0, -t_info.indicator.Size.X.Offset, 0.5, 0),
+                        Size = UDim2.new(0, 4, 1, 0) -- Ensure correct size when hiding
                     }):Play()
                     
                     if t_info.border then
@@ -444,19 +448,21 @@ local Colors = {
                     end
                 end
                 
+                -- Style for the CURRENTLY SELECTED tab (to match image)
                 tabContent.Visible = true
-                TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.MainBackground}):Play()
-                TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.DarkPrimary}):Play()
-                TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.DarkPrimary}):Play()
+                TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.MainBackground}):Play() -- Lighter background
+                TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.DarkPrimary}):Play()       -- Darker text
+                TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.DarkPrimary}):Play()         -- Darker icon
                 
-                sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary
-                sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)
+                -- Configure and show indicator for active tab
+                sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary -- Dark indicator
                 TweenService:Create(sciFiIndicator, tweenInfoMedium, {
-                    Position = UDim2.new(0, 0, 0.5, 0)
+                    Position = UDim2.new(0, 0, 0.5, 0), -- Flush left
+                    Size = UDim2.new(0, 4, 1, 0)          -- Ensure full height
                 }):Play()
 
                 if bottomBorder then
-                    bottomBorder.Visible = false
+                    bottomBorder.Visible = false -- No bottom border for active tab
                 end
         
                 if self.TabTitleLabel then
@@ -466,13 +472,14 @@ local Colors = {
             end
             
             tabButton.MouseButton1Click:Connect(function()
-                if self.CurrentTabContent ~= tabContent then
+                if self.CurrentTabContent ~= tabContent then -- Only run if not already selected
                     selectThisTab()
                 end
             end)
 
+            -- Hover effects for INACTIVE tabs
             tabButton.MouseEnter:Connect(function()
-                if self.CurrentTabContent ~= tabContent then
+                if self.CurrentTabContent ~= tabContent then -- Only if tab is NOT active
                     TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.SciFiTabHover}):Play()
                     TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.LightText}):Play()
                     TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.LightText}):Play()
@@ -480,22 +487,23 @@ local Colors = {
             end)
             
             tabButton.MouseLeave:Connect(function()
-                if self.CurrentTabContent ~= tabContent then
+                if self.CurrentTabContent ~= tabContent then -- Only if tab is NOT active
                      TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabBackground}):Play()
                      TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.UnselectedTabText}):Play()
                      TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabIcon}):Play()
                 end
             end)
             
-            if #self.Tabs == 1 then
+            -- Initial setup
+            if #self.Tabs == 1 then -- If this is the first tab, select it
                 selectThisTab()
-            else
+            else -- Otherwise, style as an unselected tab
                 tabButton.BackgroundColor3 = Colors.UnselectedTabBackground
                 tabLabel.TextColor3 = Colors.UnselectedTabText
                 tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
-                sciFiIndicator.Position = UDim2.new(0, -sciFiIndicator.Size.X.Offset, 0.5, 0)
-                sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary
-                sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)
+                sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary -- Set default color for consistency
+                sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)          -- Ensure correct size from start
+                sciFiIndicator.Position = UDim2.new(0, -sciFiIndicator.Size.X.Offset, 0.5, 0) -- Hidden
                 if bottomBorder then
                     bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
                     bottomBorder.Visible = true
@@ -504,7 +512,573 @@ local Colors = {
         
             tab.UI = tabContent
             tab.ParentWindow = self
-        
+
+            function tab:CreateButton(text, callback)
+                local buttonFrame = Instance.new("Frame")
+                buttonFrame.Name = text .. "ButtonElement"
+                buttonFrame.Size = UDim2.new(1, 0, 0, 35)
+                buttonFrame.BackgroundColor3 = Colors.ContentItemBackground
+                buttonFrame.BorderSizePixel = 0
+                buttonFrame.ClipsDescendants = true
+                buttonFrame.Parent = tab.UI
+                
+                buttonFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+                buttonFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+
+                local hoverStroke = Instance.new("UIStroke")
+                hoverStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                hoverStroke.Color = Colors.ContentItemHoverBorder
+                hoverStroke.Thickness = 1
+                hoverStroke.Enabled = false
+                hoverStroke.Parent = buttonFrame
+
+                local arrowIconSize = 10
+                local arrowIconPadding = 5
+                
+                local hoverArrowIcon = Instance.new("ImageLabel")
+                hoverArrowIcon.Name = "HoverArrowIcon"
+                hoverArrowIcon.Size = UDim2.new(0, arrowIconSize, 0, arrowIconSize)
+                hoverArrowIcon.AnchorPoint = Vector2.new(0, 0.5)
+                hoverArrowIcon.Position = UDim2.new(0, arrowIconPadding, 0.5, 0)
+                hoverArrowIcon.BackgroundTransparency = 1
+                hoverArrowIcon.Image = "rbxassetid://2207556774"
+                hoverArrowIcon.ImageColor3 = Colors.ContentItemIconHover
+                hoverArrowIcon.Visible = false
+                hoverArrowIcon.ZIndex = 2
+                hoverArrowIcon.Parent = buttonFrame
+
+                local squareIconSize = 10
+                local squareIconPadding = arrowIconPadding + arrowIconSize + 3
+                local spaceAfterSquareIcon = 5
+
+                local buttonIcon = Instance.new("Frame")
+                buttonIcon.Name = "ButtonIcon"
+                buttonIcon.Size = UDim2.new(0, squareIconSize, 0, squareIconSize)
+                buttonIcon.AnchorPoint = Vector2.new(0, 0.5)
+                buttonIcon.Position = UDim2.new(0, squareIconPadding, 0.5, 0)
+                buttonIcon.BackgroundColor3 = Colors.ContentItemIcon
+                buttonIcon.BorderSizePixel = 0
+                buttonIcon.ZIndex = 1
+                buttonIcon.Parent = buttonFrame
+                
+                local actualButton = Instance.new("TextButton")
+                actualButton.Name = "ActualButton"
+                actualButton.Size = UDim2.new(1, 0, 1, 0)
+                actualButton.Position = UDim2.new(0,0,0,0)
+                actualButton.BackgroundTransparency = 1
+                actualButton.Text = text
+                actualButton.TextColor3 = Colors.DarkText
+                actualButton.TextSize = 14
+                actualButton.TextXAlignment = Enum.TextXAlignment.Left
+                actualButton.TextWrapped = true
+                actualButton.Font = Enum.Font.SourceSans
+                actualButton.Parent = buttonFrame
+                
+                local textPadding = Instance.new("UIPadding")
+                textPadding.PaddingLeft = UDim.new(0, squareIconPadding + squareIconSize + spaceAfterSquareIcon)
+                textPadding.Parent = actualButton
+
+                local originalBackgroundColor = buttonFrame.BackgroundColor3
+                local originalTextColor = actualButton.TextColor3
+                local originalSquareIconColor = buttonIcon.BackgroundColor3
+                local originalSize = buttonFrame.Size
+
+                local isHovering = false
+                local isPressed = false
+
+                actualButton.MouseEnter:Connect(function()
+                    isHovering = true
+                    hoverArrowIcon.Visible = true
+                    if not isPressed then
+                        TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                        TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
+                        TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                        hoverStroke.Enabled = true
+                    end
+                end)
+                
+                actualButton.MouseLeave:Connect(function()
+                    isHovering = false
+                    hoverArrowIcon.Visible = false
+                    if not isPressed then
+                        TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalBackgroundColor}):Play()
+                        TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = originalTextColor}):Play()
+                        TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = originalSquareIconColor}):Play()
+                        hoverStroke.Enabled = false
+                        TweenService:Create(buttonFrame, TweenInfo.new(0.1), {Size = originalSize}):Play()
+                    end
+                end)
+
+                actualButton.MouseButton1Down:Connect(function()
+                    isPressed = true
+                    hoverArrowIcon.Visible = true
+                    local newSize = UDim2.new(originalSize.X.Scale * 0.97, originalSize.X.Offset * 0.97, 
+                                            originalSize.Y.Scale * 0.97, originalSize.Y.Offset * 0.97)
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.05), {Size = newSize}):Play()
+                    
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemHoverBackground }):Play()
+                    TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = Colors.LightText}):Play()
+                    TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                    if not hoverStroke.Enabled then hoverStroke.Enabled = true end
+                end)
+
+                actualButton.MouseButton1Up:Connect(function()
+                    isPressed = false
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.05), {Size = originalSize}):Play()
+
+                    if isHovering then
+                        hoverArrowIcon.Visible = true
+                        TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                        TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = Colors.LightText}):Play()
+                        TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                        hoverStroke.Enabled = true
+                    else
+                        hoverArrowIcon.Visible = false
+                        TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = originalBackgroundColor}):Play()
+                        TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = originalTextColor}):Play()
+                        TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = originalSquareIconColor}):Play()
+                        hoverStroke.Enabled = false
+                    end
+                end)
+                
+                actualButton.MouseButton1Click:Connect(function()
+                    if callback then pcall(callback) end
+                end)
+                return actualButton
+            end
+            
+            function tab:CreateSlider(text, min, max, default, callback)
+                local sliderFrame = Instance.new("Frame")
+                sliderFrame.Name = text .. "SliderElement"
+                sliderFrame.Size = UDim2.new(1, 0, 0, 35)
+                sliderFrame.BackgroundColor3 = Colors.ContentItemBackground
+                sliderFrame.BorderSizePixel = 0
+                sliderFrame.Parent = self.UI
+                
+                local valueLabel = Instance.new("TextLabel")
+                valueLabel.Name = "ValueLabel"
+                valueLabel.Size = UDim2.new(0, 30, 1, 0)
+                valueLabel.Position = UDim2.new(0, 10, 0, 0)
+                valueLabel.BackgroundTransparency = 1
+                valueLabel.Text = tostring(math.floor(default))
+                valueLabel.TextColor3 = Colors.DarkText
+                valueLabel.TextSize = 14
+                valueLabel.TextXAlignment = Enum.TextXAlignment.Left
+                valueLabel.Font = Enum.Font.SourceSans
+                valueLabel.Parent = sliderFrame
+                
+                local sliderTextLabel = Instance.new("TextLabel")
+                sliderTextLabel.Name = "SliderTextLabel"
+                sliderTextLabel.Size = UDim2.new(0, 120, 1, 0)
+                sliderTextLabel.Position = UDim2.new(0, valueLabel.Position.X.Offset + valueLabel.Size.X.Offset + 5, 0, 0)
+                sliderTextLabel.BackgroundTransparency = 1
+                sliderTextLabel.Text = text
+                sliderTextLabel.TextColor3 = Colors.DarkText
+                sliderTextLabel.TextSize = 14
+                sliderTextLabel.TextXAlignment = Enum.TextXAlignment.Left
+                sliderTextLabel.Font = Enum.Font.SourceSans
+                sliderTextLabel.Parent = sliderFrame
+
+                local sliderTrackMaxSegmentHeight = 10 
+                local numSegments = 30 
+                local segmentVisualWidth = 2 
+                local segmentVisualSpacing = 2 
+                local segmentMinHeightPixel = 3 
+
+                local handleVisualWidth = 3 
+                local handleVisualHeight = sliderTrackMaxSegmentHeight + 2 
+
+                local sliderTrackDrawingWidth = numSegments * segmentVisualWidth + (numSegments - 1) * segmentVisualSpacing
+
+                local animationUpdateIntervalFrames = 15 -- high = slow
+                local animationFrameCounter = 0
+
+                local sliderTrackDisplay = Instance.new("Frame")
+                sliderTrackDisplay.Name = "SliderTrackDisplay"
+                sliderTrackDisplay.Size = UDim2.new(0, sliderTrackDrawingWidth, 0, sliderTrackMaxSegmentHeight) 
+                sliderTrackDisplay.Position = UDim2.new(1, -sliderTrackDrawingWidth - 15, 0.5, -(sliderTrackMaxSegmentHeight/2))
+                sliderTrackDisplay.BackgroundTransparency = 1 
+                sliderTrackDisplay.BorderSizePixel = 0
+                sliderTrackDisplay.ClipsDescendants = false 
+                sliderTrackDisplay.Parent = sliderFrame
+
+                local segments = {}
+                for i = 1, numSegments do
+                    local segment = Instance.new("Frame")
+                    segment.Name = "Segment" .. i
+                    local xPos = (i - 1) * (segmentVisualWidth + segmentVisualSpacing)
+                    segment.Position = UDim2.new(0, xPos, 0.5, 0) 
+                    segment.AnchorPoint = Vector2.new(0, 0.5) 
+                    segment.BackgroundColor3 = Colors.SliderHandle 
+                    segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel) 
+                    segment.BorderSizePixel = 0
+                    segment.Parent = sliderTrackDisplay
+                    table.insert(segments, segment)
+                end
+                
+                local sliderHandleVisual = Instance.new("Frame")
+                sliderHandleVisual.Name = "SliderHandleVisual"
+                sliderHandleVisual.Size = UDim2.new(0, handleVisualWidth, 0, handleVisualHeight)
+                sliderHandleVisual.AnchorPoint = Vector2.new(0.5, 0.5) 
+                sliderHandleVisual.BackgroundColor3 = Colors.SliderHandle 
+                sliderHandleVisual.BorderSizePixel = 0
+                sliderHandleVisual.ZIndex = sliderTrackDisplay.ZIndex + 2 
+                sliderHandleVisual.Parent = sliderTrackDisplay
+                
+                local draggingSlider = false
+                local currentValue = default
+                local randomHeightAnimationConnection = nil
+
+                local function updateSliderStateAndHandle(val)
+                    currentValue = math.clamp(val, min, max)
+                    
+                    if valueLabel and valueLabel.Parent then 
+                        valueLabel.Text = tostring(math.floor(currentValue))
+                    end
+                    
+                    if sliderHandleVisual and sliderHandleVisual.Parent then
+                        local percentage = (currentValue - min) / (max - min)
+                        local handleXPos = percentage * sliderTrackDrawingWidth
+                        sliderHandleVisual.Position = UDim2.new(0, handleXPos, 0.5, 0)
+                    end
+                    
+                    if callback then task.spawn(callback, currentValue) end 
+                end
+
+                local function animateSegmentHeights()
+                    if not sliderTrackDisplay or not sliderTrackDisplay.Parent or not sliderTrackDisplay:IsDescendantOf(game) then
+                        if randomHeightAnimationConnection then
+                            randomHeightAnimationConnection:Disconnect()
+                            randomHeightAnimationConnection = nil
+                        end
+                        return
+                    end
+
+                    animationFrameCounter = animationFrameCounter + 1
+                    if animationFrameCounter < animationUpdateIntervalFrames then
+                        return
+                    end
+                    animationFrameCounter = 0
+
+                    local percentage = (currentValue - min) / (max - min)
+                    local numFilledThresholdPoint = percentage * numSegments 
+
+                    for i, segment in ipairs(segments) do
+                        if not segment or not segment.Parent then continue end
+
+                        if (i - 0.5) < numFilledThresholdPoint then 
+                            segment.BackgroundColor3 = Colors.SliderFill
+                            local randomHeight = math.random(segmentMinHeightPixel, sliderTrackMaxSegmentHeight)
+                            segment.Size = UDim2.new(0, segmentVisualWidth, 0, randomHeight)
+                        else 
+                            segment.BackgroundColor3 = Colors.SliderHandle 
+                            segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel)
+                        end
+                    end
+                end
+                
+                local function handleSliderMouseInput(inputPosition)
+                    if not sliderTrackDisplay or not sliderTrackDisplay.Parent or not sliderTrackDisplay:IsDescendantOf(game) then return end
+                    
+                    local relativeX = inputPosition.X - sliderTrackDisplay.AbsolutePosition.X
+                    local inputPercentage = math.clamp(relativeX / sliderTrackDisplay.AbsoluteSize.X, 0, 1)
+                    local newValue = min + (max - min) * inputPercentage
+                    updateSliderStateAndHandle(newValue)
+                end
+
+                sliderFrame.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingSlider = true
+                        handleSliderMouseInput(input.Position)
+                    end
+                end)
+
+                UserInputService.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement and draggingSlider then
+                        handleSliderMouseInput(input.Position)
+                    end
+                end)
+
+                UserInputService.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        draggingSlider = false
+                    end
+                end)
+
+                updateSliderStateAndHandle(currentValue) 
+                
+                local initialPercentage = (currentValue - min) / (max - min)
+                local initialNumFilledThresholdPoint = initialPercentage * numSegments
+                for i, segment in ipairs(segments) do
+                    if not segment or not segment.Parent then continue end
+                    if (i - 0.5) < initialNumFilledThresholdPoint then
+                        segment.BackgroundColor3 = Colors.SliderFill
+                        local randomHeight = math.random(segmentMinHeightPixel, sliderTrackMaxSegmentHeight)
+                        segment.Size = UDim2.new(0, segmentVisualWidth, 0, randomHeight)
+                    else
+                        segment.BackgroundColor3 = Colors.SliderHandle
+                        segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel)
+                    end
+                end
+                
+                if not randomHeightAnimationConnection then
+                    randomHeightAnimationConnection = game:GetService("RunService").RenderStepped:Connect(animateSegmentHeights)
+                end
+
+                sliderFrame.Destroying:Connect(function()
+                    if randomHeightAnimationConnection then
+                        randomHeightAnimationConnection:Disconnect()
+                        randomHeightAnimationConnection = nil
+                    end
+                end)
+                
+                return {
+                    Frame = sliderFrame,
+                    GetValue = function() return currentValue end,
+                    SetValue = function(val) 
+                        updateSliderStateAndHandle(val)
+                    end,
+                    Destroy = function() 
+                        if sliderFrame and sliderFrame.Parent then
+                            sliderFrame:Destroy() 
+                        end
+                        if randomHeightAnimationConnection then 
+                            randomHeightAnimationConnection:Disconnect()
+                            randomHeightAnimationConnection = nil
+                        end
+                    end
+                }
+            end
+            
+            function tab:CreateToggle(text, default, callback)
+                local toggleFrame = Instance.new("Frame")
+                toggleFrame.Name = text .. "ToggleElement"
+                toggleFrame.Size = UDim2.new(1, 0, 0, 35)
+                toggleFrame.BackgroundColor3 = Colors.ContentItemBackground
+                toggleFrame.BorderSizePixel = 0
+                toggleFrame.ClipsDescendants = true
+                toggleFrame.Parent = self.UI
+
+                local hoverStroke = Instance.new("UIStroke")
+                hoverStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                hoverStroke.Color = Colors.ContentItemHoverBorder
+                hoverStroke.Thickness = 1
+                hoverStroke.Enabled = false
+                hoverStroke.Parent = toggleFrame
+
+                local iconSize = 10
+                local iconPadding = 10
+                local spaceAfterIcon = 5
+
+                local toggleIconFrame = Instance.new("Frame")
+                toggleIconFrame.Name = "ToggleIcon"
+                toggleIconFrame.Size = UDim2.new(0, iconSize, 0, iconSize)
+                toggleIconFrame.AnchorPoint = Vector2.new(0, 0.5)
+                toggleIconFrame.Position = UDim2.new(0, iconPadding, 0.5, 0)
+                toggleIconFrame.BackgroundColor3 = Colors.ContentItemIcon
+                toggleIconFrame.BorderSizePixel = 0
+                toggleIconFrame.Parent = toggleFrame
+                
+                local toggleTextLabel = Instance.new("TextLabel")
+                toggleTextLabel.Name = "ToggleTextLabel"
+                toggleTextLabel.Size = UDim2.new(1, 0, 1, 0)
+                toggleTextLabel.Position = UDim2.new(0,0,0,0)
+                toggleTextLabel.BackgroundTransparency = 1
+                toggleTextLabel.Text = text
+                toggleTextLabel.TextColor3 = Colors.DarkText
+                toggleTextLabel.TextSize = 14
+                toggleTextLabel.TextXAlignment = Enum.TextXAlignment.Left
+                toggleTextLabel.Font = Enum.Font.SourceSans
+                toggleTextLabel.Parent = toggleFrame
+
+                local toggleTextPadding = Instance.new("UIPadding")
+                toggleTextPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon)
+                toggleTextPadding.PaddingRight = UDim.new(0, 60)
+                toggleTextPadding.Parent = toggleTextLabel
+                
+                local statusContainerWidth = 50
+                local statusContainer = Instance.new("Frame")
+                statusContainer.Name = "StatusContainer"
+                statusContainer.Size = UDim2.new(0, statusContainerWidth, 1, 0)
+                statusContainer.AnchorPoint = Vector2.new(1, 0.5)
+                statusContainer.Position = UDim2.new(1, -5, 0.5, 0)
+                statusContainer.BackgroundTransparency = 1
+                statusContainer.ClipsDescendants = true
+                statusContainer.Parent = toggleFrame
+
+                local onLabel = Instance.new("TextLabel")
+                onLabel.Name = "OnLabel"
+                onLabel.Size = UDim2.new(1, 0, 1, 0)
+                onLabel.Position = UDim2.new(0, 0, 0, 0)
+                onLabel.BackgroundTransparency = 1
+                onLabel.Text = "ON"
+                onLabel.TextColor3 = Colors.ToggleOnText or Color3.fromRGB(76, 175, 80)
+                onLabel.TextSize = 14
+                onLabel.TextXAlignment = Enum.TextXAlignment.Center
+                onLabel.Font = Enum.Font.SourceSansBold
+                onLabel.Visible = false
+                onLabel.Parent = statusContainer
+
+                local offLabel = Instance.new("TextLabel")
+                offLabel.Name = "OffLabel"
+                offLabel.Size = UDim2.new(1, 0, 1, 0)
+                offLabel.Position = UDim2.new(0, 0, 0, 0)
+                offLabel.BackgroundTransparency = 1
+                offLabel.Text = "OFF"
+                offLabel.TextColor3 = Colors.ToggleOffText or Color3.fromRGB(180, 180, 180)
+                offLabel.TextSize = 14
+                offLabel.TextXAlignment = Enum.TextXAlignment.Center
+                offLabel.Font = Enum.Font.SourceSans
+                offLabel.Visible = false
+                offLabel.Parent = statusContainer
+                
+                local actualButton = Instance.new("TextButton")
+                actualButton.Name = "ActualButton"
+                actualButton.Size = UDim2.new(1,0,1,0)
+                actualButton.BackgroundTransparency = 1
+                actualButton.Text = ""
+                actualButton.Parent = toggleFrame
+
+                local isToggled = default or false
+                local originalBackgroundColor = toggleFrame.BackgroundColor3
+                local originalToggleTextColor = toggleTextLabel.TextColor3
+                local originalIconColor = toggleIconFrame.BackgroundColor3
+                local originalSize = toggleFrame.Size -- for scale effect
+
+                local isHovering = false
+                local isPressed = false -- for scale effect
+
+                local function updateToggleVisuals()
+                    local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- Animation
+
+                    if isToggled then
+                        onLabel.Visible = true
+                        offLabel.Visible = false
+                        onLabel.Position = UDim2.new(-1, 0, 0, 0) -- on from left
+                        TweenService:Create(onLabel, tweenInfo, {Position = UDim2.new(0,0,0,0)}):Play()
+                        TweenService:Create(offLabel, tweenInfo, {Position = UDim2.new(1,0,0,0)}):Play() -- off to right
+                    else
+                        offLabel.Visible = true
+                        onLabel.Visible = false
+                        offLabel.Position = UDim2.new(1, 0, 0, 0) -- off to right
+                        TweenService:Create(offLabel, tweenInfo, {Position = UDim2.new(0,0,0,0)}):Play()
+                        TweenService:Create(onLabel, tweenInfo, {Position = UDim2.new(-1,0,0,0)}):Play() -- on to left
+                    end
+                    
+                    if callback then
+                        pcall(callback, isToggled)
+                    end
+                end
+                
+                actualButton.MouseEnter:Connect(function()
+                    isHovering = true
+                    if not isPressed then
+                        TweenService:Create(toggleFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                        TweenService:Create(toggleTextLabel, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
+                        TweenService:Create(toggleIconFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                        hoverStroke.Enabled = true
+                    end
+                end)
+                
+                actualButton.MouseLeave:Connect(function()
+                    isHovering = false
+                    if not isPressed then
+                        TweenService:Create(toggleFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalBackgroundColor}):Play()
+                        TweenService:Create(toggleTextLabel, TweenInfo.new(0.1), {TextColor3 = originalToggleTextColor}):Play()
+                        TweenService:Create(toggleIconFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalIconColor}):Play()
+                        hoverStroke.Enabled = false
+                        TweenService:Create(toggleFrame, TweenInfo.new(0.1), {Size = originalSize}):Play()
+                    end
+                end)
+
+                actualButton.MouseButton1Down:Connect(function()
+                    isPressed = true
+                end)
+
+                actualButton.MouseButton1Up:Connect(function()
+                    isPressed = false
+                end)
+                
+                actualButton.MouseButton1Click:Connect(function()
+                    isToggled = not isToggled
+                    updateToggleVisuals()
+                end)
+                
+                updateToggleVisuals()
+                
+                return {
+                    Frame = toggleFrame,
+                    GetValue = function() return isToggled end,
+                    SetValue = function(value) 
+                        isToggled = value
+                        updateToggleVisuals()
+                    end
+                }
+            end
+
+            function tab:CreateHeader(text)
+                local header = Instance.new("TextLabel")
+                header.Name = "Header"
+                header.Size = UDim2.new(1, 0, 0, 30)
+                header.BackgroundTransparency = 1
+                header.Text = text
+                header.TextColor3 = Colors.ContentTitleText
+                header.TextSize = 18
+                header.TextXAlignment = Enum.TextXAlignment.Left
+                header.Font = Enum.Font.SourceSansBold
+                header.Parent = self.UI
+                return header
+            end
+            
+            function tab:CreateParagraph(text)
+                local paragraph = Instance.new("TextLabel")
+                paragraph.Name = "Paragraph"
+                paragraph.Size = UDim2.new(1, 0, 0, 20)
+                paragraph.BackgroundTransparency = 1
+                paragraph.Text = text
+                paragraph.TextColor3 = Colors.DarkText
+                paragraph.TextSize = 14
+                paragraph.TextXAlignment = Enum.TextXAlignment.Left
+                paragraph.TextWrapped = true
+                paragraph.Font = Enum.Font.SourceSans
+                paragraph.Parent = self.UI
+                
+                coroutine.wrap(function()
+                    task.wait()
+                    local availableWidth = paragraph.AbsoluteSize.X
+                    if availableWidth == 0 and self.UI.Parent.AbsoluteSize.X > 0 then
+                        if self.UI.Parent and self.UI.Parent.Parent and self.UI.Parent.Parent:FindFirstChild("ContentLayout") then
+                            local parentContentLayout = self.UI.Parent.Parent:FindFirstChild("ContentLayout")
+                            if parentContentLayout and parentContentLayout:IsA("UIListLayout") then
+                                availableWidth = self.UI.Parent.AbsoluteSize.X - (parentContentLayout.Padding.Offset * 2)
+                            else
+                                availableWidth = self.UI.Parent.AbsoluteSize.X
+                            end
+                        elseif self.UI.Parent then
+                             availableWidth = self.UI.Parent.AbsoluteSize.X
+                        end
+
+                        local localLayout = self.UI:FindFirstChildOfClass("UIListLayout")
+                        if localLayout then
+                             availableWidth = self.UI.AbsoluteSize.X
+                             if availableWidth == 0 and self.UI.Parent then
+                                availableWidth = self.UI.Parent.AbsoluteSize.X - 20
+                             end
+                        end
+
+
+                    end
+
+                    if availableWidth > 0 then
+                        local textSize = game:GetService("TextService"):GetTextSize(text, 14, Enum.Font.SourceSans, Vector2.new(availableWidth, math.huge))
+                        paragraph.Size = UDim2.new(1, 0, 0, textSize.Y + 5)
+                    else
+                        paragraph.AutomaticSize = Enum.AutomaticSize.Y
+                    end
+                end)()
+                return paragraph
+            end
+            
             return tab
         end
         
