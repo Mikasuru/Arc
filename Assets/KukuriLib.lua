@@ -35,139 +35,139 @@ local Colors = {
     TabSeparatorLine = Color3.fromRGB(200, 195, 185)
 }
 
-function KukuriLib:CreateWindow(title, subtitle)
-    local window = {}
-    
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "KukuriLib_Redesigned"
-    screenGui.Parent = CoreGui
-    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    screenGui.ResetOnSpawn = false
-    
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainFrame"
-    mainFrame.Size = UDim2.new(0, 650, 0, 450)
-    mainFrame.Position = UDim2.new(0.5, -325, 0.5, -225)
-    mainFrame.BackgroundColor3 = Colors.TabContainerBackground
-    mainFrame.BorderSizePixel = 1
-    mainFrame.BorderColor3 = Colors.MainFrameOuterBorder
-    mainFrame.Parent = screenGui
-    
-    local titleBar = Instance.new("Frame")
-    titleBar.Name = "TitleBar"
-    titleBar.Size = UDim2.new(1, 0, 0, 30)
-    titleBar.Position = UDim2.new(0, 0, 0, 0)
-    titleBar.BackgroundColor3 = Colors.DarkPrimary
-    titleBar.BorderSizePixel = 0
-    titleBar.Parent = mainFrame
-    
-    local titleIcon = Instance.new("Frame")
-    titleIcon.Name = "TitleIcon"
-    titleIcon.Size = UDim2.new(0, 10, 0, 10)
-    titleIcon.Position = UDim2.new(0, 10, 0.5, -5)
-    titleIcon.BackgroundColor3 = Colors.LightText
-    titleIcon.BorderSizePixel = 0
-    titleIcon.Parent = titleBar
-    
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Name = "TitleLabel"
-    titleLabel.Size = UDim2.new(1, -35, 1, 0)
-    titleLabel.Position = UDim2.new(0, 28, 0, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = title or "Label"
-    titleLabel.TextColor3 = Colors.LightText
-    titleLabel.TextSize = 14
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Font = Enum.Font.SourceSans
-    titleLabel.Parent = titleBar
-    
-    local tabContainer = Instance.new("Frame")
-    tabContainer.Name = "TabContainer"
-    tabContainer.Size = UDim2.new(0, 180, 1, -30)
-    tabContainer.Position = UDim2.new(0, 0, 0, 30)
-    tabContainer.BackgroundColor3 = Colors.TabContainerBackground
-    tabContainer.BorderSizePixel = 0
-    tabContainer.Parent = mainFrame
-    
-    local tabListLayout = Instance.new("UIListLayout")
-    tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabListLayout.FillDirection = Enum.FillDirection.Vertical
-    tabListLayout.Padding = UDim.new(0, 0)
-    tabListLayout.Parent = tabContainer
-    
-    local contentFrame = Instance.new("Frame")
-    contentFrame.Name = "ContentFrame"
-    contentFrame.Size = UDim2.new(1, -tabContainer.Size.X.Offset, 1, -30)
-    contentFrame.Position = UDim2.new(0, tabContainer.Size.X.Offset, 0, 30)
-    contentFrame.BackgroundColor3 = Colors.MainBackground
-    contentFrame.BorderSizePixel = 0
-    contentFrame.Parent = mainFrame
-    
-    local tabTitleLabel = Instance.new("TextLabel")
-    tabTitleLabel.Name = "TabTitleLabel"
-    tabTitleLabel.Size = UDim2.new(1, -20, 0, 40)
-    tabTitleLabel.Position = UDim2.new(0, 15, 0, 15)
-    tabTitleLabel.BackgroundTransparency = 1
-    tabTitleLabel.Text = ""
-    tabTitleLabel.TextColor3 = Colors.ContentTitleText
-    tabTitleLabel.TextSize = 24
-    tabTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    tabTitleLabel.Font = Enum.Font.SourceSansBold
-    tabTitleLabel.Parent = contentFrame
-    
-    local contentScroll = Instance.new("ScrollingFrame")
-    contentScroll.Name = "ContentScroll"
-    contentScroll.Size = UDim2.new(1, -20, 1, -65)
-    contentScroll.Position = UDim2.new(0, 10, 0, 55)
-    contentScroll.BackgroundTransparency = 1
-    contentScroll.BorderSizePixel = 0
-    contentScroll.ScrollBarThickness = 6
-    contentScroll.ScrollBarImageColor3 = Colors.SliderTrack
-    contentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    contentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    contentScroll.Parent = contentFrame
-    
-    local contentLayout = Instance.new("UIListLayout")
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.FillDirection = Enum.FillDirection.Vertical
-    contentLayout.Padding = UDim.new(0, 8)
-    contentLayout.Parent = contentScroll
-    
-    local dragging = false
-    local dragStart = nil
-    local startPos = nil
-    
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = mainFrame.Position
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    
-    window.ScreenGui = screenGui
-    window.MainFrame = mainFrame
-    window.TabContainer = tabContainer
-    window.ContentFrame = contentFrame
-    window.ContentScroll = contentScroll
-    window.TabTitleLabel = tabTitleLabel
-    window.CurrentTabContent = nil
-    window.Tabs = {}
-    
-    function window:CreateTab(name)
+    function KukuriLib:CreateWindow(title, subtitle)
+        local window = {}
+        
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "KukuriLib_Redesigned"
+        screenGui.Parent = CoreGui
+        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        screenGui.ResetOnSpawn = false
+        
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Name = "MainFrame"
+        mainFrame.Size = UDim2.new(0, 650, 0, 450)
+        mainFrame.Position = UDim2.new(0.5, -325, 0.5, -225)
+        mainFrame.BackgroundColor3 = Colors.TabContainerBackground
+        mainFrame.BorderSizePixel = 1
+        mainFrame.BorderColor3 = Colors.MainFrameOuterBorder
+        mainFrame.Parent = screenGui
+        
+        local titleBar = Instance.new("Frame")
+        titleBar.Name = "TitleBar"
+        titleBar.Size = UDim2.new(1, 0, 0, 30)
+        titleBar.Position = UDim2.new(0, 0, 0, 0)
+        titleBar.BackgroundColor3 = Colors.DarkPrimary
+        titleBar.BorderSizePixel = 0
+        titleBar.Parent = mainFrame
+        
+        local titleIcon = Instance.new("Frame")
+        titleIcon.Name = "TitleIcon"
+        titleIcon.Size = UDim2.new(0, 10, 0, 10)
+        titleIcon.Position = UDim2.new(0, 10, 0.5, -5)
+        titleIcon.BackgroundColor3 = Colors.LightText
+        titleIcon.BorderSizePixel = 0
+        titleIcon.Parent = titleBar
+        
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Name = "TitleLabel"
+        titleLabel.Size = UDim2.new(1, -35, 1, 0)
+        titleLabel.Position = UDim2.new(0, 28, 0, 0)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.Text = title or "Label"
+        titleLabel.TextColor3 = Colors.LightText
+        titleLabel.TextSize = 14
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        titleLabel.Font = Enum.Font.SourceSans
+        titleLabel.Parent = titleBar
+        
+        local tabContainer = Instance.new("Frame")
+        tabContainer.Name = "TabContainer"
+        tabContainer.Size = UDim2.new(0, 180, 1, -30)
+        tabContainer.Position = UDim2.new(0, 0, 0, 30)
+        tabContainer.BackgroundColor3 = Colors.TabContainerBackground
+        tabContainer.BorderSizePixel = 0
+        tabContainer.Parent = mainFrame
+        
+        local tabListLayout = Instance.new("UIListLayout")
+        tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        tabListLayout.FillDirection = Enum.FillDirection.Vertical
+        tabListLayout.Padding = UDim.new(0, 0)
+        tabListLayout.Parent = tabContainer
+        
+        local contentFrame = Instance.new("Frame")
+        contentFrame.Name = "ContentFrame"
+        contentFrame.Size = UDim2.new(1, -tabContainer.Size.X.Offset, 1, -30)
+        contentFrame.Position = UDim2.new(0, tabContainer.Size.X.Offset, 0, 30)
+        contentFrame.BackgroundColor3 = Colors.MainBackground
+        contentFrame.BorderSizePixel = 0
+        contentFrame.Parent = mainFrame
+        
+        local tabTitleLabel = Instance.new("TextLabel")
+        tabTitleLabel.Name = "TabTitleLabel"
+        tabTitleLabel.Size = UDim2.new(1, -20, 0, 40)
+        tabTitleLabel.Position = UDim2.new(0, 15, 0, 15)
+        tabTitleLabel.BackgroundTransparency = 1
+        tabTitleLabel.Text = ""
+        tabTitleLabel.TextColor3 = Colors.ContentTitleText
+        tabTitleLabel.TextSize = 24
+        tabTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        tabTitleLabel.Font = Enum.Font.SourceSansBold
+        tabTitleLabel.Parent = contentFrame
+        
+        local contentScroll = Instance.new("ScrollingFrame")
+        contentScroll.Name = "ContentScroll"
+        contentScroll.Size = UDim2.new(1, -20, 1, -65)
+        contentScroll.Position = UDim2.new(0, 10, 0, 55)
+        contentScroll.BackgroundTransparency = 1
+        contentScroll.BorderSizePixel = 0
+        contentScroll.ScrollBarThickness = 6
+        contentScroll.ScrollBarImageColor3 = Colors.SliderTrack
+        contentScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        contentScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        contentScroll.Parent = contentFrame
+        
+        local contentLayout = Instance.new("UIListLayout")
+        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        contentLayout.FillDirection = Enum.FillDirection.Vertical
+        contentLayout.Padding = UDim.new(0, 8)
+        contentLayout.Parent = contentScroll
+        
+        local dragging = false
+        local dragStart = nil
+        local startPos = nil
+        
+        titleBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                dragStart = input.Position
+                startPos = mainFrame.Position
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+                local delta = input.Position - dragStart
+                mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+        
+        window.ScreenGui = screenGui
+        window.MainFrame = mainFrame
+        window.TabContainer = tabContainer
+        window.ContentFrame = contentFrame
+        window.ContentScroll = contentScroll
+        window.TabTitleLabel = tabTitleLabel
+        window.CurrentTabContent = nil
+        window.Tabs = {}
+        
+        function window:CreateTab(name)
         local tab = {}
         local tabNameUpper = name:upper()
         
@@ -187,7 +187,7 @@ function KukuriLib:CreateWindow(title, subtitle)
         tabIcon.Position = UDim2.new(0, 12, 0.5, -5)
         tabIcon.BorderSizePixel = 0
         tabIcon.Parent = tabButton
-
+    
         local bottomBorder = Instance.new("Frame")
         bottomBorder.Name = "BottomBorder"
         bottomBorder.Size = UDim2.new(1,0,0,1)
@@ -212,35 +212,49 @@ function KukuriLib:CreateWindow(title, subtitle)
         tabContentLayout.Padding = UDim.new(0, 8)
         tabContentLayout.Parent = tabContent
         
+        if not self.Tabs then self.Tabs = {} end
         table.insert(self.Tabs, {button = tabButton, content = tabContent, icon = tabIcon, border = bottomBorder, name = name})
-        
-        tabButton.MouseButton1Click:Connect(function()
-            for _, t in pairs(self.Tabs) do
-                t.content.Visible = false
-                t.button.BackgroundColor3 = Colors.UnselectedTabBackground
-                t.button.TextColor3 = Colors.UnselectedTabText
-                t.icon.BackgroundColor3 = Colors.UnselectedTabIcon
-                t.border.BackgroundColor3 = Colors.TabSeparatorLine
-                t.border.Visible = true
+
+        local function selectThisTab()
+            for _, t_info in pairs(self.Tabs) do
+                t_info.content.Visible = false
+                t_info.button.BackgroundColor3 = Colors.UnselectedTabBackground
+                t_info.button.TextColor3 = Colors.UnselectedTabText
+                t_info.icon.BackgroundColor3 = Colors.UnselectedTabIcon
+                if t_info.border then
+                    t_info.border.BackgroundColor3 = Colors.TabSeparatorLine
+                    t_info.border.Visible = true
+                end
             end
             
             tabContent.Visible = true
             tabButton.BackgroundColor3 = Colors.DarkPrimary
             tabButton.TextColor3 = Colors.LightText
             tabIcon.BackgroundColor3 = Colors.LightText
-            bottomBorder.Visible = false
-
-            self.TabTitleLabel.Text = tabNameUpper
+            if bottomBorder then
+                bottomBorder.Visible = false
+            end
+    
+            if self.TabTitleLabel then
+                self.TabTitleLabel.Text = tabNameUpper
+            end
             self.CurrentTabContent = tabContent
+        end
+        
+        tabButton.MouseButton1Click:Connect(function()
+            selectThisTab()
         end)
         
         if #self.Tabs == 1 then
-            tabButton:MouseButton1Click()
+            selectThisTab()
         else
             tabButton.BackgroundColor3 = Colors.UnselectedTabBackground
             tabButton.TextColor3 = Colors.UnselectedTabText
             tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
-            bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
+            if bottomBorder then
+                bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
+                bottomBorder.Visible = true
+            end
         end
         
         tab.UI = tabContent
