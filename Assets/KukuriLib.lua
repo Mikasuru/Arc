@@ -173,6 +173,9 @@ local Colors = {
     ContentItemHoverBorder = Color3.fromRGB(218, 213, 202),
     ContentItemIcon = Color3.fromRGB(70, 70, 70),
     ContentItemIconHover = Color3.fromRGB(255, 255, 255),
+
+    Colors.SciFiIndicator = Color3.fromRGB(0, 220, 255)
+    Colors.SciFiTabHover = Color3.fromRGB(75, 70, 65)
     
     SliderTrack = Color3.fromRGB(205, 200, 190),
     SliderFill = Color3.fromRGB(100, 95, 90),
@@ -334,94 +337,149 @@ local Colors = {
         window.Tabs = {}
         
         function window:CreateTab(name)
-        local tab = {}
-        local tabNameUpper = name:upper()
-        
-        local tabButton = Instance.new("TextButton")
-        tabButton.Name = name .. "TabButton"
-        tabButton.Size = UDim2.new(1, 0, 0, 40)
-        tabButton.BorderSizePixel = 0
-        tabButton.Text = "    " .. tabNameUpper
-        tabButton.TextSize = 14
-        tabButton.TextXAlignment = Enum.TextXAlignment.Left
-        tabButton.Font = Enum.Font.SourceSans
-        tabButton.Parent = self.TabContainer
-        
-        local tabIcon = Instance.new("Frame")
-        tabIcon.Name = "TabIcon"
-        tabIcon.Size = UDim2.new(0, 10, 0, 10)
-        tabIcon.Position = UDim2.new(0, 12, 0.5, -5)
-        tabIcon.BorderSizePixel = 0
-        tabIcon.Parent = tabButton
-    
-        local bottomBorder = Instance.new("Frame")
-        bottomBorder.Name = "BottomBorder"
-        bottomBorder.Size = UDim2.new(1,0,0,1)
-        bottomBorder.Position = UDim2.new(0,0,1,-1)
-        bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
-        bottomBorder.BorderSizePixel = 0
-        bottomBorder.ZIndex = tabButton.ZIndex + 1
-        bottomBorder.Parent = tabButton
-        
-        local tabContent = Instance.new("Frame")
-        tabContent.Name = name .. "Content"
-        tabContent.Size = UDim2.new(1, 0, 0, 0)
-        tabContent.AutomaticSize = Enum.AutomaticSize.Y
-        tabContent.BackgroundTransparency = 1
-        tabContent.BorderSizePixel = 0
-        tabContent.Visible = false
-        tabContent.Parent = self.ContentScroll
-        
-        local tabContentLayout = Instance.new("UIListLayout")
-        tabContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        tabContentLayout.FillDirection = Enum.FillDirection.Vertical
-        tabContentLayout.Padding = UDim.new(0, 8)
-        tabContentLayout.Parent = tabContent
-        
-        if not self.Tabs then self.Tabs = {} end
-        table.insert(self.Tabs, {button = tabButton, content = tabContent, icon = tabIcon, border = bottomBorder, name = name})
+            local tab = {}
+            local tabNameUpper = name:upper()
+            
+            local tabButton = Instance.new("TextButton")
+            tabButton.Name = name .. "TabButton"
+            tabButton.Size = UDim2.new(1, 0, 0, 45)
+            tabButton.BorderSizePixel = 0
+            tabButton.Text = ""
+            tabButton.Font = Enum.Font.SourceSans 
+            tabButton.Parent = self.TabContainer
+            tabButton.AutoButtonColor = false
 
-        local function selectThisTab()
-            for _, t_info in pairs(self.Tabs) do
-                t_info.content.Visible = false
-                t_info.button.BackgroundColor3 = Colors.UnselectedTabBackground
-                t_info.button.TextColor3 = Colors.UnselectedTabText
-                t_info.icon.BackgroundColor3 = Colors.UnselectedTabIcon
-                if t_info.border then
-                    t_info.border.BackgroundColor3 = Colors.TabSeparatorLine
-                    t_info.border.Visible = true
+            local sciFiIndicator = Instance.new("Frame")
+            sciFiIndicator.Name = "SciFiIndicator"
+            sciFiIndicator.Size = UDim2.new(0, 4, 0.8, 0)
+            sciFiIndicator.AnchorPoint = Vector2.new(0, 0.5)
+            sciFiIndicator.Position = UDim2.new(0, -sciFiIndicator.Size.X.Offset, 0.5, 0)
+            sciFiIndicator.BackgroundColor3 = Colors.SciFiIndicator or Colors.DarkPrimary
+            sciFiIndicator.BorderSizePixel = 0
+            sciFiIndicator.ZIndex = tabButton.ZIndex + 2
+            sciFiIndicator.Parent = tabButton
+
+            local tabIcon = Instance.new("Frame")
+            tabIcon.Name = "TabIcon"
+            tabIcon.Size = UDim2.new(0, 12, 0, 12)
+            tabIcon.AnchorPoint = Vector2.new(0, 0.5)
+            tabIcon.Position = UDim2.new(0, 15, 0.5, 0)
+            tabIcon.BorderSizePixel = 0
+            tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
+            tabIcon.ZIndex = tabButton.ZIndex + 1
+            tabIcon.Parent = tabButton
+
+            local tabLabel = Instance.new("TextLabel")
+            tabLabel.Name = "TabLabel"
+            tabLabel.Size = UDim2.new(1, - (tabIcon.Position.X.Offset + tabIcon.Size.X.Offset + 10), 1, 0)
+            tabLabel.Position = UDim2.new(0, tabIcon.Position.X.Offset + tabIcon.Size.X.Offset + 8, 0, 0)
+            tabLabel.BackgroundTransparency = 1
+            tabLabel.Text = tabNameUpper
+            tabLabel.TextColor3 = Colors.UnselectedTabText
+            tabLabel.TextSize = 14
+            tabLabel.TextXAlignment = Enum.TextXAlignment.Left
+            tabLabel.Font = Enum.Font.SourceSansBold
+            tabLabel.ZIndex = tabButton.ZIndex + 1
+            tabLabel.Parent = tabButton
+        
+            local bottomBorder = Instance.new("Frame")
+            bottomBorder.Name = "BottomBorder"
+            bottomBorder.Size = UDim2.new(1,0,0,1)
+            bottomBorder.Position = UDim2.new(0,0,1,-1)
+            bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
+            bottomBorder.BorderSizePixel = 0
+            bottomBorder.ZIndex = tabButton.ZIndex
+            bottomBorder.Parent = tabButton
+            
+            local tabContent = Instance.new("Frame")
+            tabContent.Name = name .. "Content"
+            tabContent.Size = UDim2.new(1, 0, 0, 0)
+            tabContent.AutomaticSize = Enum.AutomaticSize.Y
+            tabContent.BackgroundTransparency = 1
+            tabContent.BorderSizePixel = 0
+            tabContent.Visible = false
+            tabContent.Parent = self.ContentScroll
+            
+            local tabContentLayout = Instance.new("UIListLayout")
+            tabContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            tabContentLayout.FillDirection = Enum.FillDirection.Vertical
+            tabContentLayout.Padding = UDim.new(0, 8)
+            tabContentLayout.Parent = tabContent
+            
+            if not self.Tabs then self.Tabs = {} end
+            table.insert(self.Tabs, {
+                button = tabButton, 
+                content = tabContent, 
+                icon = tabIcon, 
+                label = tabLabel,
+                border = bottomBorder, 
+                indicator = sciFiIndicator,
+                name = name
+            })
+
+            local tweenInfoFast = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tweenInfoMedium = TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+
+            local function selectThisTab()
+                for _, t_info in pairs(self.Tabs) do
+                    t_info.content.Visible = false
+                    TweenService:Create(t_info.button, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabBackground}):Play()
+                    TweenService:Create(t_info.label, tweenInfoFast, {TextColor3 = Colors.UnselectedTabText}):Play()
+                    TweenService:Create(t_info.icon, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabIcon}):Play()
+                    TweenService:Create(t_info.indicator, tweenInfoMedium, {Position = UDim2.new(0, -t_info.indicator.Size.X.Offset, 0.5, 0)}):Play()
+                    
+                    if t_info.border then
+                        t_info.border.BackgroundColor3 = Colors.TabSeparatorLine
+                        t_info.border.Visible = true
+                    end
                 end
+                
+                tabContent.Visible = true
+                TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.DarkPrimary}):Play()
+                TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.LightText}):Play()
+                TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.LightText}):Play()
+                TweenService:Create(sciFiIndicator, tweenInfoMedium, {Position = UDim2.new(0, 5, 0.5, 0)}):Play()
+
+                if bottomBorder then
+                    bottomBorder.Visible = false
+                end
+        
+                if self.TabTitleLabel then
+                    self.TabTitleLabel.Text = tabNameUpper
+                end
+                self.CurrentTabContent = tabContent
             end
             
-            tabContent.Visible = true
-            tabButton.BackgroundColor3 = Colors.DarkPrimary
-            tabButton.TextColor3 = Colors.LightText
-            tabIcon.BackgroundColor3 = Colors.LightText
-            if bottomBorder then
-                bottomBorder.Visible = false
+            tabButton.MouseButton1Click:Connect(function()
+                selectThisTab()
+            end)
+
+            local originalBgColor = Colors.UnselectedTabBackground
+            tabButton.MouseEnter:Connect(function()
+                if self.CurrentTabContent ~= tabContent then
+                    originalBgColor = tabButton.BackgroundColor3
+                    TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.SciFiTabHover or Colors.DarkPrimary:Lerp(Colors.UnselectedTabBackground, 0.5)}):Play()
+                end
+            end)
+            
+            tabButton.MouseLeave:Connect(function()
+                if self.CurrentTabContent ~= tabContent then
+                     TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = originalBgColor}):Play()
+                end
+            end)
+            
+            if #self.Tabs == 1 then
+                selectThisTab()
+            else
+                tabButton.BackgroundColor3 = Colors.UnselectedTabBackground
+                tabLabel.TextColor3 = Colors.UnselectedTabText
+                tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
+                sciFiIndicator.Position = UDim2.new(0, -sciFiIndicator.Size.X.Offset, 0.5, 0)
+                if bottomBorder then
+                    bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
+                    bottomBorder.Visible = true
+                end
             end
-    
-            if self.TabTitleLabel then
-                self.TabTitleLabel.Text = tabNameUpper
-            end
-            self.CurrentTabContent = tabContent
-        end
-        
-        tabButton.MouseButton1Click:Connect(function()
-            selectThisTab()
-        end)
-        
-        if #self.Tabs == 1 then
-            selectThisTab()
-        else
-            tabButton.BackgroundColor3 = Colors.UnselectedTabBackground
-            tabButton.TextColor3 = Colors.UnselectedTabText
-            tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
-            if bottomBorder then
-                bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
-                bottomBorder.Visible = true
-            end
-        end
         
         tab.UI = tabContent
         tab.ParentWindow = self
