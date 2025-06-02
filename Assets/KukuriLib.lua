@@ -180,8 +180,8 @@ local Colors = {
     ContentItemIcon = Color3.fromRGB(70, 70, 70),
     ContentItemIconHover = Color3.fromRGB(255, 255, 255),
 
-    Colors.SciFiIndicator = Color3.fromRGB(0, 220, 255),
-    Colors.SciFiTabHover = Color3.fromRGB(75, 70, 65),
+    SciFiIndicator = Color3.fromRGB(0, 220, 255),
+    SciFiTabHover = Color3.fromRGB(75, 70, 65),
     
     SliderTrack = Color3.fromRGB(205, 200, 190),
     SliderFill = Color3.fromRGB(100, 95, 90),
