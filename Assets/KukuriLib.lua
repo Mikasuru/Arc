@@ -592,45 +592,85 @@ local Colors = {
             sliderTextLabel.Font = Enum.Font.SourceSans
             sliderTextLabel.Parent = sliderFrame
 
-            local sliderTrackWidth = 150
-            local sliderTrackHeight = 6
+            local sliderTrackVisualHeight = 8
+            local numSegments = 30
+            local segmentVisualWidth = 3
+            local segmentVisualSpacing = 2
+            local segmentDotHeight = 4
+            
+            local handleVisualWidth = 4
+            local handleVisualHeight = sliderTrackVisualHeight
 
-            local sliderTrack = Instance.new("Frame")
-            sliderTrack.Name = "SliderTrack"
-            sliderTrack.Size = UDim2.new(0, sliderTrackWidth, 0, sliderTrackHeight)
-            sliderTrack.Position = UDim2.new(1, -sliderTrackWidth - 15, 0.5, -(sliderTrackHeight/2))
-            sliderTrack.BackgroundColor3 = Colors.SliderTrack
-            sliderTrack.BorderSizePixel = 0
-            sliderTrack.Parent = sliderFrame
+            local sliderTrackDrawingWidth = numSegments * segmentVisualWidth + (numSegments - 1) * segmentVisualSpacing
+
+            local sliderTrackDisplay = Instance.new("Frame")
+            sliderTrackDisplay.Name = "SliderTrackDisplay"
+            sliderTrackDisplay.Size = UDim2.new(0, sliderTrackDrawingWidth, 0, sliderTrackVisualHeight)
+            sliderTrackDisplay.Position = UDim2.new(1, -sliderTrackDrawingWidth - 15, 0.5, -(sliderTrackVisualHeight/2))
+            sliderTrackDisplay.BackgroundTransparency = 1
+            sliderTrackDisplay.BorderSizePixel = 0
+            sliderTrackDisplay.ClipsDescendants = false
+            sliderTrackDisplay.Parent = sliderFrame
+
+            local segments = {}
+            for i = 1, numSegments do
+                local segment = Instance.new("Frame")
+                segment.Name = "Segment" .. i
+                local xPos = (i - 1) * (segmentVisualWidth + segmentVisualSpacing)
+                segment.Position = UDim2.new(0, xPos, 0.5, 0) 
+                segment.AnchorPoint = Vector2.new(0, 0.5)
+                segment.BackgroundColor3 = Colors.SliderHandle
+                segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentDotHeight)
+                segment.BorderSizePixel = 0
+                segment.Parent = sliderTrackDisplay
+                table.insert(segments, segment)
+            end
             
-            local sliderFill = Instance.new("Frame")
-            sliderFill.Name = "SliderFill"
-            sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
-            sliderFill.BackgroundColor3 = Colors.SliderFill
-            sliderFill.BorderSizePixel = 0
-            sliderFill.Parent = sliderTrack
-            
-            local sliderHandle = Instance.new("Frame")
-            sliderHandle.Name = "SliderHandle"
-            sliderHandle.Size = UDim2.new(0, 2, 0, 12)
-            sliderHandle.Position = UDim2.new(sliderFill.Size.X.Scale, -1, 0.5, -6)
-            sliderHandle.BackgroundColor3 = Colors.SliderHandle
-            sliderHandle.BorderSizePixel = 0
-            sliderHandle.ZIndex = sliderTrack.ZIndex + 1
-            sliderHandle.Parent = sliderTrack
+            local sliderHandleVisual = Instance.new("Frame")
+            sliderHandleVisual.Name = "SliderHandleVisual"
+            sliderHandleVisual.Size = UDim2.new(0, handleVisualWidth, 0, handleVisualHeight)
+            sliderHandleVisual.AnchorPoint = Vector2.new(0.5, 0.5)
+            sliderHandleVisual.BackgroundColor3 = Colors.SliderHandle
+            sliderHandleVisual.BorderSizePixel = 0
+            sliderHandleVisual.ZIndex = sliderTrackDisplay.ZIndex + 2
+            sliderHandleVisual.Parent = sliderTrackDisplay
             
             local draggingSlider = false
             local currentValue = default
             
-            local function updateSlider(inputPos)
-                local relativeX = inputPos.X - sliderTrack.AbsolutePosition.X
-                local percentage = math.clamp(relativeX / sliderTrack.AbsoluteSize.X, 0, 1)
-                local value = min + (max - min) * percentage
-                currentValue = value
+            local function updateSliderVisuals(val)
+                local clampedValue = math.clamp(val, min, max)
+                local percentage = (clampedValue - min) / (max - min)
                 
-                sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-                sliderHandle.Position = UDim2.new(percentage, -sliderHandle.Size.X.Offset / 2, 0.5, -sliderHandle.Size.Y.Offset / 2)
-                valueLabel.Text = tostring(math.floor(currentValue))
+                if not valueLabel or not valueLabel.Parent then return end
+                valueLabel.Text = tostring(math.floor(clampedValue))
+
+                local numFilledThreshold = percentage * numSegments
+
+                for i, segment in ipairs(segments) do
+                    if not segment or not segment.Parent then continue end
+                    if (i - 0.5) < numFilledThreshold then
+                        segment.BackgroundColor3 = Colors.SliderFill
+                        segment.Size = UDim2.new(0, segmentVisualWidth, 1, 0)
+                    else
+                        segment.BackgroundColor3 = Colors.SliderHandle
+                        segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentDotHeight)
+                    end
+                end
+                
+                if not sliderHandleVisual or not sliderHandleVisual.Parent then return end
+                local handleXPos = percentage * sliderTrackDrawingWidth
+                sliderHandleVisual.Position = UDim2.new(0, handleXPos, 0.5, 0)
+            end
+
+            local function handleSliderInput(inputPos)
+                if not sliderTrackDisplay or not sliderTrackDisplay.Parent or not sliderTrackDisplay:IsDescendantOf(game) then return end
+
+                local relativeX = inputPos.X - sliderTrackDisplay.AbsolutePosition.X
+                local percentage = math.clamp(relativeX / sliderTrackDisplay.AbsoluteSize.X, 0, 1)
+                currentValue = min + (max - min) * percentage
+                
+                updateSliderVisuals(currentValue)
                 
                 if callback then pcall(callback, currentValue) end
             end
@@ -638,12 +678,12 @@ local Colors = {
             sliderFrame.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     draggingSlider = true
-                    updateSlider(input.Position)
+                    handleSliderInput(input.Position)
                 end
             end)
             UserInputService.InputChanged:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseMovement and draggingSlider then
-                    updateSlider(input.Position)
+                    handleSliderInput(input.Position)
                 end
             end)
             UserInputService.InputEnded:Connect(function(input)
@@ -651,16 +691,15 @@ local Colors = {
                     draggingSlider = false
                 end
             end)
+
+            updateSliderVisuals(currentValue)
             
             return {
                 Frame = sliderFrame,
                 GetValue = function() return currentValue end,
                 SetValue = function(val) 
                     currentValue = math.clamp(val, min, max)
-                    local percentage = (currentValue - min) / (max - min)
-                    sliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-                    sliderHandle.Position = UDim2.new(percentage, -sliderHandle.Size.X.Offset / 2, 0.5, -sliderHandle.Size.Y.Offset / 2)
-                    valueLabel.Text = tostring(math.floor(currentValue))
+                    updateSliderVisuals(currentValue)
                     if callback then pcall(callback, currentValue) end
                 end
             }
