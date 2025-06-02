@@ -8,156 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 local SplashTime = 3
-local uiToggleKey = Enum.KeyCode.LeftCtrl
 local mainScreenGuiInstance = nil
-
-local OPEN_ANIM_DURATION = 0.5 
-local CLOSE_ANIM_DURATION = 0.4
-
-local KukuriLib_isUiVisible = false
-
-local function playUiOpenAnimation(screenGui, mainFrame)
-    if not mainFrame or not screenGui then return end
-    
-    screenGui.Enabled = true
-    
-    mainFrame.Visible = true
-    mainFrame.BackgroundTransparency = 1
-    mainFrame.Size = UDim2.new(0, 0, 0, 0)
-    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    mainFrame.Rotation = -15
-
-    for _, child in pairs(mainFrame:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child.Visible = false
-        end
-    end
-    
-    local mainFrameTween = TweenService:Create(mainFrame, 
-        TweenInfo.new(OPEN_ANIM_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
-        {
-            Size = UDim2.new(0, 650, 0, 450),
-            BackgroundTransparency = mainFrame:GetAttribute("OriginalTransparency") or 0,
-            Rotation = 0
-        }
-    )
-    mainFrameTween:Play()
-    mainFrameTween.Completed:Wait()
-
-    local titleBar = mainFrame:FindFirstChild("TitleBar")
-    local tabContainer = mainFrame:FindFirstChild("TabContainer")
-    local contentFrame = mainFrame:FindFirstChild("ContentFrame")
-
-    local childrenToShow = {}
-    if titleBar then table.insert(childrenToShow, titleBar) end
-    if tabContainer then table.insert(childrenToShow, tabContainer) end
-    if contentFrame then table.insert(childrenToShow, contentFrame) end
-
-    for _, child in pairs(childrenToShow) do
-        child.Visible = true
-        child.Transparency = 1
-        local originalPosition = child:GetAttribute("OriginalPosition") or child.Position
-        
-        if child.Name == "TitleBar" then
-            child.Position = originalPosition - UDim2.new(0,0,0,20)
-        elseif child.Name == "TabContainer" then
-            child.Position = originalPosition - UDim2.new(0,20,0,0)
-        elseif child.Name == "ContentFrame" then
-             child.Position = originalPosition + UDim2.new(0,20,0,0)
-        end
-        
-        TweenService:Create(child, 
-            TweenInfo.new(OPEN_ANIM_DURATION * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-            {
-                Position = originalPosition,
-                Transparency = 0
-            }
-        ):Play()
-        task.wait(0.05)
-    end
-end
-
-local function playUiCloseAnimation(screenGui, mainFrame)
-    if not mainFrame or not screenGui then return end
-    
-    local titleBar = mainFrame:FindFirstChild("TitleBar")
-    local tabContainer = mainFrame:FindFirstChild("TabContainer")
-    local contentFrame = mainFrame:FindFirstChild("ContentFrame")
-    
-    local childrenToHide = {}
-    if contentFrame then table.insert(childrenToHide, contentFrame) end
-    if tabContainer then table.insert(childrenToHide, tabContainer) end
-    if titleBar then table.insert(childrenToHide, titleBar) end
-
-    for _, child in pairs(childrenToHide) do
-        local targetPosition
-        local originalPosition = child:GetAttribute("OriginalPosition") or child.Position
-
-        if child.Name == "TitleBar" then
-            targetPosition = originalPosition - UDim2.new(0,0,0,20)
-        elseif child.Name == "TabContainer" then
-            targetPosition = originalPosition - UDim2.new(0,20,0,0)
-        elseif child.Name == "ContentFrame" then
-             targetPosition = originalPosition + UDim2.new(0,20,0,0)
-        else
-            targetPosition = originalPosition
-        end
-
-        TweenService:Create(child, 
-            TweenInfo.new(CLOSE_ANIM_DURATION * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
-            {
-                Position = targetPosition,
-                Transparency = 1
-            }
-        ):Play()
-        task.wait(0.03)
-    end
-    
-    task.wait(CLOSE_ANIM_DURATION * 0.4)
-
-    local mainFrameTween = TweenService:Create(mainFrame, 
-        TweenInfo.new(CLOSE_ANIM_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.In), 
-        {
-            Size = UDim2.new(0, mainFrame.AbsoluteSize.X * 0.2, 0, mainFrame.AbsoluteSize.Y * 0.2),
-            BackgroundTransparency = 1,
-            Rotation = 30,
-            Position = UDim2.new(0.5, 0, 0.8, 0)
-        }
-    )
-    mainFrameTween:Play()
-    
-    mainFrameTween.Completed:Wait()
-    mainFrame.Visible = false
-    screenGui.Enabled = false
-end
-
-function KukuriLib:ToggleUI()
-    print("Library: ToggleUI CALLED (Simplified Test).")
-    if not mainScreenGuiInstance or not mainScreenGuiInstance.Parent then
-        warn("KukuriLib: Simplified ToggleUI - mainScreenGuiInstance or parent missing.")
-        return
-    end
-    local mainFrame = mainScreenGuiInstance:FindFirstChild("MainFrame")
-    if not mainFrame then
-        warn("KukuriLib: Simplified ToggleUI - MainFrame missing.")
-        return
-    end
-
-    if mainScreenGuiInstance.Enabled then
-        print("Library: Simplified ToggleUI - Disabling ScreenGui.")
-        mainScreenGuiInstance.Enabled = false
-        mainFrame.Visible = false
-    else
-        print("Library: Simplified ToggleUI - Enabling ScreenGui.")
-        mainScreenGuiInstance.Enabled = true
-        mainFrame.Visible = true
-        mainFrame.Size = UDim2.new(0, 650, 0, 450)
-        mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        mainFrame.Rotation = 0
-        mainFrame.BackgroundTransparency = 0
-    end
-end
-
 
 local function SplashScreen(callbackAfterSplash)
     local Players = game:GetService("Players")
@@ -345,12 +196,12 @@ local Colors = {
         
         local screenGui = Instance.new("ScreenGui")
         screenGui.Name = "KukuriLib_Redesigned"
+        --screenGui.Parent = CoreGui
         screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         screenGui.ResetOnSpawn = false
-        screenGui.Enabled = false
+        screenGui.Enabled = true
 
         mainScreenGuiInstance = screenGui
-        print("Library: CreateWindow - mainScreenGuiInstance SET TO:", mainScreenGuiInstance, "Name:", mainScreenGuiInstance.Name)
         
         local mainFrame = Instance.new("Frame")
         mainFrame.Name = "MainFrame"
@@ -364,7 +215,6 @@ local Colors = {
         mainFrame.ClipsDescendants = true
         mainFrame.Visible = false
         mainFrame.Parent = screenGui
-        mainFrame:SetAttribute("OriginalTransparency", 0)
         
         local titleBar = Instance.new("Frame")
         titleBar.Name = "TitleBar"
@@ -373,8 +223,7 @@ local Colors = {
         titleBar.BackgroundColor3 = Colors.DarkPrimary
         titleBar.BorderSizePixel = 0
         titleBar.Parent = mainFrame
-        titleBar:SetAttribute("OriginalPosition", titleBar.Position)
-    
+        
         local titleIcon = Instance.new("Frame")
         titleIcon.Name = "TitleIcon"
         titleIcon.Size = UDim2.new(0, 10, 0, 10)
@@ -402,8 +251,7 @@ local Colors = {
         tabContainer.BackgroundColor3 = Colors.TabContainerBackground
         tabContainer.BorderSizePixel = 0
         tabContainer.Parent = mainFrame
-        tabContainer:SetAttribute("OriginalPosition", tabContainer.Position)
-    
+        
         local tabListLayout = Instance.new("UIListLayout")
         tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         tabListLayout.FillDirection = Enum.FillDirection.Vertical
@@ -417,8 +265,7 @@ local Colors = {
         contentFrame.BackgroundColor3 = Colors.MainBackground
         contentFrame.BorderSizePixel = 0
         contentFrame.Parent = mainFrame
-        contentFrame:SetAttribute("OriginalPosition", contentFrame.Position)
-    
+        
         local tabTitleLabel = Instance.new("TextLabel")
         tabTitleLabel.Name = "TabTitleLabel"
         tabTitleLabel.Size = UDim2.new(1, -20, 0, 40)
@@ -1030,7 +877,5 @@ local Colors = {
     
     return window
 end
-
-KukuriLib.KeyToToggle = uiToggleKey 
 
 return KukuriLib
