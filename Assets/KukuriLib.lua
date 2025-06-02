@@ -592,22 +592,22 @@ local Colors = {
             sliderTextLabel.Font = Enum.Font.SourceSans
             sliderTextLabel.Parent = sliderFrame
 
-            local sliderTrackVisualHeight = 8
-            local numSegments = 30
-            local segmentVisualWidth = 3
-            local segmentVisualSpacing = 2
-            local segmentDotHeight = 4
-            
-            local handleVisualWidth = 4
-            local handleVisualHeight = sliderTrackVisualHeight
+            local sliderTrackMaxSegmentHeight = 10
+            local numSegments = 30 
+            local segmentVisualWidth = 2
+            local segmentVisualSpacing = 2 
+            local segmentMinHeightPixel = 3
+
+            local handleVisualWidth = 3
+            local handleVisualHeight = sliderTrackMaxSegmentHeight + 2
 
             local sliderTrackDrawingWidth = numSegments * segmentVisualWidth + (numSegments - 1) * segmentVisualSpacing
 
             local sliderTrackDisplay = Instance.new("Frame")
             sliderTrackDisplay.Name = "SliderTrackDisplay"
-            sliderTrackDisplay.Size = UDim2.new(0, sliderTrackDrawingWidth, 0, sliderTrackVisualHeight)
-            sliderTrackDisplay.Position = UDim2.new(1, -sliderTrackDrawingWidth - 15, 0.5, -(sliderTrackVisualHeight/2))
-            sliderTrackDisplay.BackgroundTransparency = 1
+            sliderTrackDisplay.Size = UDim2.new(0, sliderTrackDrawingWidth, 0, sliderTrackMaxSegmentHeight) 
+            sliderTrackDisplay.Position = UDim2.new(1, -sliderTrackDrawingWidth - 15, 0.5, -(sliderTrackMaxSegmentHeight/2))
+            sliderTrackDisplay.BackgroundTransparency = 1 
             sliderTrackDisplay.BorderSizePixel = 0
             sliderTrackDisplay.ClipsDescendants = false
             sliderTrackDisplay.Parent = sliderFrame
@@ -618,9 +618,9 @@ local Colors = {
                 segment.Name = "Segment" .. i
                 local xPos = (i - 1) * (segmentVisualWidth + segmentVisualSpacing)
                 segment.Position = UDim2.new(0, xPos, 0.5, 0) 
-                segment.AnchorPoint = Vector2.new(0, 0.5)
+                segment.AnchorPoint = Vector2.new(0, 0.5) 
                 segment.BackgroundColor3 = Colors.SliderHandle
-                segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentDotHeight)
+                segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel) 
                 segment.BorderSizePixel = 0
                 segment.Parent = sliderTrackDisplay
                 table.insert(segments, segment)
@@ -629,78 +629,114 @@ local Colors = {
             local sliderHandleVisual = Instance.new("Frame")
             sliderHandleVisual.Name = "SliderHandleVisual"
             sliderHandleVisual.Size = UDim2.new(0, handleVisualWidth, 0, handleVisualHeight)
-            sliderHandleVisual.AnchorPoint = Vector2.new(0.5, 0.5)
+            sliderHandleVisual.AnchorPoint = Vector2.new(0.5, 0.5) 
             sliderHandleVisual.BackgroundColor3 = Colors.SliderHandle
             sliderHandleVisual.BorderSizePixel = 0
-            sliderHandleVisual.ZIndex = sliderTrackDisplay.ZIndex + 2
+            sliderHandleVisual.ZIndex = sliderTrackDisplay.ZIndex + 2 
             sliderHandleVisual.Parent = sliderTrackDisplay
             
             local draggingSlider = false
             local currentValue = default
-            
-            local function updateSliderVisuals(val)
-                local clampedValue = math.clamp(val, min, max)
-                local percentage = (clampedValue - min) / (max - min)
-                
-                if not valueLabel or not valueLabel.Parent then return end
-                valueLabel.Text = tostring(math.floor(clampedValue))
+            local randomHeightAnimationConnection = nil
 
-                local numFilledThreshold = percentage * numSegments
+            local function updateSliderStateAndHandle(val)
+                currentValue = math.clamp(val, min, max)
+                
+                if valueLabel and valueLabel.Parent then 
+                    valueLabel.Text = tostring(math.floor(currentValue))
+                end
+                
+                if sliderHandleVisual and sliderHandleVisual.Parent then
+                    local percentage = (currentValue - min) / (max - min)
+                    local handleXPos = percentage * sliderTrackDrawingWidth
+                    sliderHandleVisual.Position = UDim2.new(0, handleXPos, 0.5, 0)
+                end
+                
+                if callback then task.spawn(callback, currentValue) end
+            end
+
+            local function animateSegmentHeights()
+                if not sliderTrackDisplay or not sliderTrackDisplay.Parent or not sliderTrackDisplay:IsDescendantOf(game) then
+                    if randomHeightAnimationConnection then
+                        randomHeightAnimationConnection:Disconnect()
+                        randomHeightAnimationConnection = nil
+                    end
+                    return
+                end
+
+                local percentage = (currentValue - min) / (max - min)
+                local numFilledThresholdPoint = percentage * numSegments
 
                 for i, segment in ipairs(segments) do
                     if not segment or not segment.Parent then continue end
-                    if (i - 0.5) < numFilledThreshold then
+
+                    if (i - 0.5) < numFilledThresholdPoint then
                         segment.BackgroundColor3 = Colors.SliderFill
-                        segment.Size = UDim2.new(0, segmentVisualWidth, 1, 0)
+                        local randomHeight = math.random(segmentMinHeightPixel, sliderTrackMaxSegmentHeight)
+                        segment.Size = UDim2.new(0, segmentVisualWidth, 0, randomHeight)
                     else
                         segment.BackgroundColor3 = Colors.SliderHandle
-                        segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentDotHeight)
+                        segment.Size = UDim2.new(0, segmentVisualWidth, 0, segmentMinHeightPixel)
                     end
                 end
-                
-                if not sliderHandleVisual or not sliderHandleVisual.Parent then return end
-                local handleXPos = percentage * sliderTrackDrawingWidth
-                sliderHandleVisual.Position = UDim2.new(0, handleXPos, 0.5, 0)
-            end
-
-            local function handleSliderInput(inputPos)
-                if not sliderTrackDisplay or not sliderTrackDisplay.Parent or not sliderTrackDisplay:IsDescendantOf(game) then return end
-
-                local relativeX = inputPos.X - sliderTrackDisplay.AbsolutePosition.X
-                local percentage = math.clamp(relativeX / sliderTrackDisplay.AbsoluteSize.X, 0, 1)
-                currentValue = min + (max - min) * percentage
-                
-                updateSliderVisuals(currentValue)
-                
-                if callback then pcall(callback, currentValue) end
             end
             
+            local function handleSliderMouseInput(inputPosition)
+                if not sliderTrackDisplay or not sliderTrackDisplay.Parent or not sliderTrackDisplay:IsDescendantOf(game) then return end
+                
+                local relativeX = inputPosition.X - sliderTrackDisplay.AbsolutePosition.X
+                local inputPercentage = math.clamp(relativeX / sliderTrackDisplay.AbsoluteSize.X, 0, 1)
+                local newValue = min + (max - min) * inputPercentage
+                updateSliderStateAndHandle(newValue)
+            end
+
             sliderFrame.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     draggingSlider = true
-                    handleSliderInput(input.Position)
+                    handleSliderMouseInput(input.Position)
                 end
             end)
+
             UserInputService.InputChanged:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseMovement and draggingSlider then
-                    handleSliderInput(input.Position)
+                    handleSliderMouseInput(input.Position)
                 end
             end)
+
             UserInputService.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     draggingSlider = false
                 end
             end)
 
-            updateSliderVisuals(currentValue)
+            updateSliderStateAndHandle(currentValue) 
+            
+            if not randomHeightAnimationConnection then
+                task.defer(animateSegmentHeights)
+                randomHeightAnimationConnection = game:GetService("RunService").RenderStepped:Connect(animateSegmentHeights)
+            end
+
+            sliderFrame.Destroying:Connect(function()
+                if randomHeightAnimationConnection then
+                    randomHeightAnimationConnection:Disconnect()
+                    randomHeightAnimationConnection = nil
+                end
+            end)
             
             return {
                 Frame = sliderFrame,
                 GetValue = function() return currentValue end,
                 SetValue = function(val) 
-                    currentValue = math.clamp(val, min, max)
-                    updateSliderVisuals(currentValue)
-                    if callback then pcall(callback, currentValue) end
+                    updateSliderStateAndHandle(val)
+                end,
+                Destroy = function()
+                    if sliderFrame and sliderFrame.Parent then
+                        sliderFrame:Destroy()
+                    end
+                    if randomHeightAnimationConnection then 
+                        randomHeightAnimationConnection:Disconnect()
+                        randomHeightAnimationConnection = nil
+                    end
                 end
             }
         end
