@@ -357,10 +357,10 @@ local Colors = {
 
             local sciFiIndicator = Instance.new("Frame")
             sciFiIndicator.Name = "SciFiIndicator"
-            sciFiIndicator.Size = UDim2.new(0, 4, 0.8, 0)
+            sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)
             sciFiIndicator.AnchorPoint = Vector2.new(0, 0.5)
-            sciFiIndicator.Position = UDim2.new(0, -sciFiIndicator.Size.X.Offset, 0.5, 0)
-            sciFiIndicator.BackgroundColor3 = Colors.SciFiIndicator or Colors.DarkPrimary
+            sciFiIndicator.Position = UDim2.new(0, -4, 0.5, 0)
+            sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary
             sciFiIndicator.BorderSizePixel = 0
             sciFiIndicator.ZIndex = tabButton.ZIndex + 2
             sciFiIndicator.Parent = tabButton
@@ -423,8 +423,8 @@ local Colors = {
                 name = name
             })
 
-            local tweenInfoFast = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            local tweenInfoMedium = TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+            local tweenInfoFast = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tweenInfoMedium = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 
             local function selectThisTab()
                 for _, t_info in pairs(self.Tabs) do
@@ -432,7 +432,11 @@ local Colors = {
                     TweenService:Create(t_info.button, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabBackground}):Play()
                     TweenService:Create(t_info.label, tweenInfoFast, {TextColor3 = Colors.UnselectedTabText}):Play()
                     TweenService:Create(t_info.icon, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabIcon}):Play()
-                    TweenService:Create(t_info.indicator, tweenInfoMedium, {Position = UDim2.new(0, -t_info.indicator.Size.X.Offset, 0.5, 0)}):Play()
+                    
+                    t_info.indicator.BackgroundColor3 = Colors.DarkPrimary
+                    TweenService:Create(t_info.indicator, tweenInfoMedium, {
+                        Position = UDim2.new(0, -t_info.indicator.Size.X.Offset, 0.5, 0)
+                    }):Play()
                     
                     if t_info.border then
                         t_info.border.BackgroundColor3 = Colors.TabSeparatorLine
@@ -441,10 +445,15 @@ local Colors = {
                 end
                 
                 tabContent.Visible = true
-                TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.DarkPrimary}):Play()
-                TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.LightText}):Play()
-                TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.LightText}):Play()
-                TweenService:Create(sciFiIndicator, tweenInfoMedium, {Position = UDim2.new(0, 5, 0.5, 0)}):Play()
+                TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.MainBackground}):Play()
+                TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.DarkPrimary}):Play()
+                TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.DarkPrimary}):Play()
+                
+                sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary
+                sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)
+                TweenService:Create(sciFiIndicator, tweenInfoMedium, {
+                    Position = UDim2.new(0, 0, 0.5, 0)
+                }):Play()
 
                 if bottomBorder then
                     bottomBorder.Visible = false
@@ -457,20 +466,24 @@ local Colors = {
             end
             
             tabButton.MouseButton1Click:Connect(function()
-                selectThisTab()
+                if self.CurrentTabContent ~= tabContent then
+                    selectThisTab()
+                end
             end)
 
-            local originalBgColor = Colors.UnselectedTabBackground
             tabButton.MouseEnter:Connect(function()
                 if self.CurrentTabContent ~= tabContent then
-                    originalBgColor = tabButton.BackgroundColor3
-                    TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.SciFiTabHover or Colors.DarkPrimary:Lerp(Colors.UnselectedTabBackground, 0.5)}):Play()
+                    TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.SciFiTabHover}):Play()
+                    TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.LightText}):Play()
+                    TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.LightText}):Play()
                 end
             end)
             
             tabButton.MouseLeave:Connect(function()
                 if self.CurrentTabContent ~= tabContent then
-                     TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = originalBgColor}):Play()
+                     TweenService:Create(tabButton, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabBackground}):Play()
+                     TweenService:Create(tabLabel, tweenInfoFast, {TextColor3 = Colors.UnselectedTabText}):Play()
+                     TweenService:Create(tabIcon, tweenInfoFast, {BackgroundColor3 = Colors.UnselectedTabIcon}):Play()
                 end
             end)
             
@@ -481,11 +494,19 @@ local Colors = {
                 tabLabel.TextColor3 = Colors.UnselectedTabText
                 tabIcon.BackgroundColor3 = Colors.UnselectedTabIcon
                 sciFiIndicator.Position = UDim2.new(0, -sciFiIndicator.Size.X.Offset, 0.5, 0)
+                sciFiIndicator.BackgroundColor3 = Colors.DarkPrimary
+                sciFiIndicator.Size = UDim2.new(0, 4, 1, 0)
                 if bottomBorder then
                     bottomBorder.BackgroundColor3 = Colors.TabSeparatorLine
                     bottomBorder.Visible = true
                 end
             end
+        
+            tab.UI = tabContent
+            tab.ParentWindow = self
+        
+            return tab
+        end
         
         tab.UI = tabContent
         tab.ParentWindow = self
