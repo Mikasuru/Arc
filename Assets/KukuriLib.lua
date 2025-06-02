@@ -287,8 +287,8 @@ function KukuriLib:CreateWindow(title, subtitle)
     
     local contentScroll = Instance.new("ScrollingFrame")
     contentScroll.Name = "ContentScroll"
-    contentScroll.Size = UDim2.new(1, -20, 1, -65) 
-    contentScroll.Position = UDim2.new(0, 10, 0, 55)
+    contentScroll.Size = UDim2.new(1, -30, 1, -65)
+    contentScroll.Position = UDim2.new(0, 15, 0, 55)
     contentScroll.BackgroundTransparency = 1
     contentScroll.BorderSizePixel = 0
     contentScroll.ScrollBarThickness = 6
