@@ -289,7 +289,8 @@ local Colors = {
             local buttonIcon = Instance.new("Frame")
             buttonIcon.Name = "ButtonIcon"
             buttonIcon.Size = UDim2.new(0, iconSize, 0, iconSize)
-            buttonIcon.Position = UDim2.new(0, iconPadding, 0.5, -(iconSize/2))
+            buttonIcon.AnchorPoint = Vector2.new(0, 0.5)
+            buttonIcon.Position = UDim2.new(0, iconPadding, 0.5, 0)
             buttonIcon.BackgroundColor3 = Colors.ContentItemIcon
             buttonIcon.BorderSizePixel = 0
             buttonIcon.Parent = buttonFrame
@@ -308,7 +309,8 @@ local Colors = {
             actualButton.Parent = buttonFrame
             
             local textPadding = Instance.new("UIPadding")
-            textPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon)
+
+            textPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon) 
             textPadding.Parent = actualButton
 
             local originalBackgroundColor = buttonFrame.BackgroundColor3
@@ -317,18 +319,21 @@ local Colors = {
             local originalSize = buttonFrame.Size
 
             local isHovering = false
+            local isPressed = false
 
             actualButton.MouseEnter:Connect(function()
                 isHovering = true
-                TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
-                TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
-                TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
-                hoverStroke.Enabled = true
+                if not isPressed then
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                    TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
+                    TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                    hoverStroke.Enabled = true
+                end
             end)
             
             actualButton.MouseLeave:Connect(function()
                 isHovering = false
-                if actualButton.SelectedState ~= Enum.UserInputState.Sink then
+                if not isPressed then
                     TweenService:Create(buttonFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalBackgroundColor}):Play()
                     TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = originalTextColor}):Play()
                     TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = originalIconColor}):Play()
@@ -338,33 +343,36 @@ local Colors = {
             end)
 
             actualButton.MouseButton1Down:Connect(function()
+                isPressed = true
                 local newSize = UDim2.new(originalSize.X.Scale * 0.97, originalSize.X.Offset * 0.97, 
                                           originalSize.Y.Scale * 0.97, originalSize.Y.Offset * 0.97)
                 TweenService:Create(buttonFrame, TweenInfo.new(0.05), {Size = newSize}):Play()
-
-                local pressedColor = Colors.ContentItemHoverBackground:Lerp(Color3.new(0,0,0), 0.1) 
-                TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = pressedColor}):Play()
+                
+                TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemHoverBackground }):Play()
+                TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = Colors.LightText}):Play()
+                TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                if not hoverStroke.Enabled then hoverStroke.Enabled = true end
             end)
 
             actualButton.MouseButton1Up:Connect(function()
+                isPressed = false
                 TweenService:Create(buttonFrame, TweenInfo.new(0.05), {Size = originalSize}):Play()
 
                 if isHovering then
                     TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                    TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = Colors.LightText}):Play()
+                    TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                    hoverStroke.Enabled = true
                 else
                     TweenService:Create(buttonFrame, TweenInfo.new(0.05), {BackgroundColor3 = originalBackgroundColor}):Play()
-                    TweenService:Create(actualButton, TweenInfo.new(0.1), {TextColor3 = originalTextColor}):Play()
-                    TweenService:Create(buttonIcon, TweenInfo.new(0.1), {BackgroundColor3 = originalIconColor}):Play()
+                    TweenService:Create(actualButton, TweenInfo.new(0.05), {TextColor3 = originalTextColor}):Play()
+                    TweenService:Create(buttonIcon, TweenInfo.new(0.05), {BackgroundColor3 = originalIconColor}):Play()
                     hoverStroke.Enabled = false
                 end
             end)
             
             actualButton.MouseButton1Click:Connect(function()
                 if callback then pcall(callback) end
-                    local clickSound = Instance.new("Sound", workspace)
-                    clickSound.SoundId = "rbxassetid://4307186075"
-                    clickSound:Play()
-                    game.Debris:AddItem(clickSound, clickSound.TimeLength)
             end)
             return actualButton
         end
