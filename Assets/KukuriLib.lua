@@ -266,7 +266,7 @@ local Colors = {
             buttonFrame.Size = UDim2.new(1, 0, 0, 35)
             buttonFrame.BackgroundColor3 = Colors.ContentItemBackground
             buttonFrame.BorderSizePixel = 0
-            buttonFrame.Parent = self.UI
+            buttonFrame.Parent = tab.UI
             
             local buttonIcon = Instance.new("Frame")
             buttonIcon.Name = "ButtonIcon"
@@ -289,13 +289,16 @@ local Colors = {
             actualButton.Font = Enum.Font.SourceSans
             actualButton.Parent = buttonFrame
             actualButton.TextXOffset = 25 
-
-
+    
             actualButton.MouseEnter:Connect(function()
-                TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.SliderTrack}):Play()
+                if TweenService and Colors and Colors.SliderTrack then 
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.SliderTrack}):Play()
+                end
             end)
             actualButton.MouseLeave:Connect(function()
-                TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.ContentItemBackground}):Play()
+                if TweenService and Colors and Colors.ContentItemBackground then
+                    TweenService:Create(buttonFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.ContentItemBackground}):Play()
+                end
             end)
             actualButton.MouseButton1Click:Connect(function()
                 if callback then pcall(callback) end
