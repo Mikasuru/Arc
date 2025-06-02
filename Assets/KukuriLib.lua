@@ -15,10 +15,12 @@ local mainScreenGuiInstance = nil
 local OpenAnim = 0.5
 local CloseAnim = 0.4
 
+local KukuriLib_Instance_Global
+local KukuriLib_isUiVisible = false
+
 local function playUiOpenAnimation(screenGui, mainFrame)
-    if not mainFrame then return end
+    if not mainFrame or not screenGui then return end
     
-    isUiVisible = true
     screenGui.Enabled = true
     
     mainFrame.Visible = true
@@ -34,10 +36,10 @@ local function playUiOpenAnimation(screenGui, mainFrame)
     end
     
     local mainFrameTween = TweenService:Create(mainFrame, 
-        TweenInfo.new(OpenAnim, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
+        TweenInfo.new(OPEN_ANIM_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), 
         {
             Size = UDim2.new(0, 650, 0, 450),
-            BackgroundTransparency = 0,
+            BackgroundTransparency = mainFrame:GetAttribute("OriginalTransparency") or 0,
             Rotation = 0
         }
     )
@@ -56,7 +58,8 @@ local function playUiOpenAnimation(screenGui, mainFrame)
     for _, child in pairs(childrenToShow) do
         child.Visible = true
         child.Transparency = 1
-        local originalPosition = child.Position
+        local originalPosition = child:GetAttribute("OriginalPosition") or child.Position
+        
         if child.Name == "TitleBar" then
             child.Position = originalPosition - UDim2.new(0,0,0,20)
         elseif child.Name == "TabContainer" then
@@ -66,7 +69,7 @@ local function playUiOpenAnimation(screenGui, mainFrame)
         end
         
         TweenService:Create(child, 
-            TweenInfo.new(OpenAnim * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+            TweenInfo.new(OPEN_ANIM_DURATION * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
             {
                 Position = originalPosition,
                 Transparency = 0
@@ -74,17 +77,10 @@ local function playUiOpenAnimation(screenGui, mainFrame)
         ):Play()
         task.wait(0.05)
     end
-    
-    -- local openSound = Instance.new("Sound", CoreGui)
-    -- openSound.SoundId = "rbxassetid://"
-    -- openSound:Play()
-    -- game.Debris:AddItem(openSound, openSound.TimeLength)
 end
 
 local function playUiCloseAnimation(screenGui, mainFrame)
-    if not mainFrame then return end
-    
-    isUiVisible = false
+    if not mainFrame or not screenGui then return end
     
     local titleBar = mainFrame:FindFirstChild("TitleBar")
     local tabContainer = mainFrame:FindFirstChild("TabContainer")
@@ -97,18 +93,20 @@ local function playUiCloseAnimation(screenGui, mainFrame)
 
     for _, child in pairs(childrenToHide) do
         local targetPosition
+        local originalPosition = child:GetAttribute("OriginalPosition") or child.Position
+
         if child.Name == "TitleBar" then
-            targetPosition = child.Position - UDim2.new(0,0,0,20)
+            targetPosition = originalPosition - UDim2.new(0,0,0,20)
         elseif child.Name == "TabContainer" then
-            targetPosition = child.Position - UDim2.new(0,20,0,0)
+            targetPosition = originalPosition - UDim2.new(0,20,0,0)
         elseif child.Name == "ContentFrame" then
-             targetPosition = child.Position + UDim2.new(0,20,0,0)
+             targetPosition = originalPosition + UDim2.new(0,20,0,0)
         else
-            targetPosition = child.Position
+            targetPosition = originalPosition 
         end
 
         TweenService:Create(child, 
-            TweenInfo.new(CloseAnim * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+            TweenInfo.new(CLOSE_ANIM_DURATION * 0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
             {
                 Position = targetPosition,
                 Transparency = 1
@@ -117,10 +115,10 @@ local function playUiCloseAnimation(screenGui, mainFrame)
         task.wait(0.03)
     end
     
-    task.wait(CloseAnim * 0.4)
+    task.wait(CLOSE_ANIM_DURATION * 0.4)
 
     local mainFrameTween = TweenService:Create(mainFrame, 
-        TweenInfo.new(CloseAnim, Enum.EasingStyle.Quart, Enum.EasingDirection.In), 
+        TweenInfo.new(CLOSE_ANIM_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.In), 
         {
             Size = UDim2.new(0, mainFrame.AbsoluteSize.X * 0.2, 0, mainFrame.AbsoluteSize.Y * 0.2),
             BackgroundTransparency = 1,
@@ -145,20 +143,14 @@ function KukuriLib:ToggleUI()
         return
     end
 
-    if isUiVisible then
+    if KukuriLib_isUiVisible then
         playUiCloseAnimation(mainScreenGuiInstance, mainFrame)
+        KukuriLib_isUiVisible = false
     else
         playUiOpenAnimation(mainScreenGuiInstance, mainFrame)
+        KukuriLib_isUiVisible = true
     end
 end
-
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then return end
-
-    if input.KeyCode == uiToggleKey then
-        KukuriLib:ToggleUI()
-    end
-end)
 
 local function SplashScreen(callbackAfterSplash)
     local Players = game:GetService("Players")
