@@ -134,9 +134,22 @@ local function SplashScreen(callbackAfterSplash)
     pleaseWaitLabel.Parent = mainContainer
 
     local starBottomYOffset = splashOverallSize * 0.5
+    if type(starBottomYOffset) ~= "number" then
+        warn("SplashScreen DEBUG: starBottomYOffset is not a number! Value: ", starBottomYOffset, " (Type: ", type(starBottomYOffset), ")")
+        starBottomYOffset = 0
+    end
     local labelOffsetY = 15
+    if type(labelOffsetY) ~= "number" then
+        warn("SplashScreen DEBUG: labelOffsetY is not a number! Value: ", labelOffsetY)
+        labelOffsetY = 0
+    end
     local labelHeightHalf = pleaseWaitLabel.Size.Y.Offset * 0.5
-    
+    if type(labelHeightHalf) ~= "number" then
+        warn("SplashScreen DEBUG: labelHeightHalf is not a number! Value: ", labelHeightHalf, " (because pleaseWaitLabel.Size.Y.Offset is ", pleaseWaitLabel.Size.Y.Offset, ")")
+        labelHeightHalf = 0
+    elseif pleaseWaitLabel.Size.Y.Offset <= 0 then
+         warn("SplashScreen DEBUG: pleaseWaitLabel.Size.Y.Offset is zero or negative, labelHeightHalf will be <= 0. Value: ", pleaseWaitLabel.Size.Y.Offset)
+    end
     
     local rotationAngle = 0
     local rotationAxis = Vector3.new(0.5, 1, 0.2).Unit
