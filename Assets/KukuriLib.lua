@@ -410,7 +410,7 @@ function KukuriLib:CreateWindow(title, subtitle)
             panel.AnchorPoint = Vector2.new(0, 0.5)
             panel.Rotation = panelSlantAngle
             panel.BackgroundColor3 = Colors.MainBackground
-            panel.BackgroundTransparency = 1
+            panel.BackgroundTransparency = 0
             panel.BorderSizePixel = 0
             panel.Parent = animContainer
 
@@ -455,44 +455,22 @@ function KukuriLib:CreateWindow(title, subtitle)
         if self.IsAnimating or not self.IsOpened then return end
         self.IsAnimating = true
 
-        local closeDuration = 0.4
-        local particleDuration = closeDuration * 0.8
-        local numParticles = 12
-
-        local particles = {}
-        for i = 1, numParticles do
-            local p = CreateGlitchParticle()
-            local startX = 0.5 + (math.random() - 0.5) * 1.2
-            local startY = 0.5 + (math.random() - 0.5) * 1.2
-            p.Position = UDim2.new(startX, 0, startY, 0)
-            p.BackgroundTransparency = 0.3
-            table.insert(particles, p)
-
-            local particleTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
-            local particleMoveTween = TweenService:Create(p, particleTweenInfo, {
-                Position = UDim2.new(0.5, 0, 0.5, 0),
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0,1,0,1)
-            })
-             task.delay(math.random() * (closeDuration - particleDuration) * 0.5, function()
-                particleMoveTween:Play()
-            end)
-        end
-
-        local mainFrameTweenInfo = TweenInfo.new(closeDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
-        local mainFrameScaleTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
-            Size = UDim2.new(0, 20, 0, 20),
-            BackgroundTransparency = 1,
-            Rotation = self.MainFrame.Rotation + math.random(-10, 10)
-        })
-        mainFrameScaleTween:Play()
+        local closeDuration = 0.3
+        local mainFrameTweenInfo = TweenInfo.new(closeDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
         
-        mainFrameScaleTween.Completed:Connect(function()
+        local mainFrameCloseTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(self.MainFrame.Size.X.Scale, self.MainFrame.Size.X.Offset * 0.8, self.MainFrame.Size.Y.Scale, self.MainFrame.Size.Y.Offset * 0.8),
+            Position = UDim2.new(self.MainFrame.Position.X.Scale, self.MainFrame.Position.X.Offset, self.MainFrame.Position.Y.Scale, self.MainFrame.Position.Y.Offset + 20) -- เลื่อนลงเล็กน้อย
+        })
+        mainFrameCloseTween:Play()
+
+        mainFrameCloseTween.Completed:Connect(function()
             self.MainFrame.Visible = false
             self.ScreenGui.Enabled = false
-            for _, p in ipairs(particles) do
-                p:Destroy()
-            end
+            self.MainFrame.Size = UDim2.new(0, 650, 0, 450) 
+            self.MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+
             self.IsAnimating = false
             self.IsOpened = false
             if callback then task.spawn(callback) end
