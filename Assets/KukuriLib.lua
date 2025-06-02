@@ -509,20 +509,33 @@ local Colors = {
             toggleFrame.Size = UDim2.new(1, 0, 0, 35)
             toggleFrame.BackgroundColor3 = Colors.ContentItemBackground
             toggleFrame.BorderSizePixel = 0
+            toggleFrame.ClipsDescendants = true
             toggleFrame.Parent = self.UI
-            
-            local toggleIcon = Instance.new("Frame")
-            toggleIcon.Name = "ToggleIcon"
-            toggleIcon.Size = UDim2.new(0, 10, 0, 10)
-            toggleIcon.Position = UDim2.new(0, 10, 0.5, -5)
-            toggleIcon.BackgroundColor3 = Colors.ContentItemIcon
-            toggleIcon.BorderSizePixel = 0
-            toggleIcon.Parent = toggleFrame
+
+            local hoverStroke = Instance.new("UIStroke")
+            hoverStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            hoverStroke.Color = Colors.ContentItemHoverBorder
+            hoverStroke.Thickness = 1
+            hoverStroke.Enabled = false
+            hoverStroke.Parent = toggleFrame
+
+            local iconSize = 10
+            local iconPadding = 10
+            local spaceAfterIcon = 5
+
+            local toggleIconFrame = Instance.new("Frame")
+            toggleIconFrame.Name = "ToggleIcon"
+            toggleIconFrame.Size = UDim2.new(0, iconSize, 0, iconSize)
+            toggleIconFrame.AnchorPoint = Vector2.new(0, 0.5)
+            toggleIconFrame.Position = UDim2.new(0, iconPadding, 0.5, 0)
+            toggleIconFrame.BackgroundColor3 = Colors.ContentItemIcon
+            toggleIconFrame.BorderSizePixel = 0
+            toggleIconFrame.Parent = toggleFrame
             
             local toggleTextLabel = Instance.new("TextLabel")
             toggleTextLabel.Name = "ToggleTextLabel"
-            toggleTextLabel.Size = UDim2.new(1, -80, 1, 0)
-            toggleTextLabel.Position = UDim2.new(0, toggleIcon.Position.X.Offset + toggleIcon.Size.X.Offset + 5, 0, 0)
+            toggleTextLabel.Size = UDim2.new(1, 0, 1, 0)
+            toggleTextLabel.Position = UDim2.new(0,0,0,0)
             toggleTextLabel.BackgroundTransparency = 1
             toggleTextLabel.Text = text
             toggleTextLabel.TextColor3 = Colors.DarkText
@@ -530,18 +543,47 @@ local Colors = {
             toggleTextLabel.TextXAlignment = Enum.TextXAlignment.Left
             toggleTextLabel.Font = Enum.Font.SourceSans
             toggleTextLabel.Parent = toggleFrame
+
+            local toggleTextPadding = Instance.new("UIPadding")
+            toggleTextPadding.PaddingLeft = UDim.new(0, iconPadding + iconSize + spaceAfterIcon)
+            toggleTextPadding.PaddingRight = UDim.new(0, 60)
+            toggleTextPadding.Parent = toggleTextLabel
             
-            local toggleStatus = Instance.new("TextLabel")
-            toggleStatus.Name = "ToggleStatus"
-            toggleStatus.Size = UDim2.new(0, 50, 1, 0)
-            toggleStatus.Position = UDim2.new(1, -55, 0, 0)
-            toggleStatus.BackgroundTransparency = 1
-            toggleStatus.Text = default and "ON" or "OFF"
-            toggleStatus.TextColor3 = default and Colors.ToggleOnText or Colors.ToggleOffText
-            toggleStatus.TextSize = 14
-            toggleStatus.TextXAlignment = Enum.TextXAlignment.Right
-            toggleStatus.Font = Enum.Font.SourceSans
-            toggleStatus.Parent = toggleFrame
+            local statusContainerWidth = 50
+            local statusContainer = Instance.new("Frame")
+            statusContainer.Name = "StatusContainer"
+            statusContainer.Size = UDim2.new(0, statusContainerWidth, 1, 0)
+            statusContainer.AnchorPoint = Vector2.new(1, 0.5)
+            statusContainer.Position = UDim2.new(1, -5, 0.5, 0)
+            statusContainer.BackgroundTransparency = 1
+            statusContainer.ClipsDescendants = true
+            statusContainer.Parent = toggleFrame
+
+            local onLabel = Instance.new("TextLabel")
+            onLabel.Name = "OnLabel"
+            onLabel.Size = UDim2.new(1, 0, 1, 0)
+            onLabel.Position = UDim2.new(0, 0, 0, 0)
+            onLabel.BackgroundTransparency = 1
+            onLabel.Text = "ON"
+            onLabel.TextColor3 = Colors.ToggleOnText or Color3.fromRGB(76, 175, 80)
+            onLabel.TextSize = 14
+            onLabel.TextXAlignment = Enum.TextXAlignment.Center
+            onLabel.Font = Enum.Font.SourceSansBold
+            onLabel.Visible = false
+            onLabel.Parent = statusContainer
+
+            local offLabel = Instance.new("TextLabel")
+            offLabel.Name = "OffLabel"
+            offLabel.Size = UDim2.new(1, 0, 1, 0)
+            offLabel.Position = UDim2.new(0, 0, 0, 0)
+            offLabel.BackgroundTransparency = 1
+            offLabel.Text = "OFF"
+            offLabel.TextColor3 = Colors.ToggleOffText or Color3.fromRGB(180, 180, 180)
+            offLabel.TextSize = 14
+            offLabel.TextXAlignment = Enum.TextXAlignment.Center
+            offLabel.Font = Enum.Font.SourceSans
+            offLabel.Visible = false
+            offLabel.Parent = statusContainer
             
             local actualButton = Instance.new("TextButton")
             actualButton.Name = "ActualButton"
@@ -551,23 +593,71 @@ local Colors = {
             actualButton.Parent = toggleFrame
 
             local isToggled = default or false
-            
+            local originalBackgroundColor = toggleFrame.BackgroundColor3
+            local originalToggleTextColor = toggleTextLabel.TextColor3
+            local originalIconColor = toggleIconFrame.BackgroundColor3
+            local originalSize = toggleFrame.Size -- for scale effect
+
+            local isHovering = false
+            local isPressed = false -- for scale effect
+
             local function updateToggleVisuals()
-                toggleStatus.Text = isToggled and "ON" or "OFF"
-                toggleStatus.TextColor3 = isToggled and Colors.ToggleOnText or Colors.ToggleOffText
+                local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) -- Animation
+
+                if isToggled then
+                    onLabel.Visible = true
+                    offLabel.Visible = false
+                    onLabel.Position = UDim2.new(-1, 0, 0, 0) -- on from left
+                    TweenService:Create(onLabel, tweenInfo, {Position = UDim2.new(0,0,0,0)}):Play()
+                    TweenService:Create(offLabel, tweenInfo, {Position = UDim2.new(1,0,0,0)}):Play() -- off to right
+                else
+                    offLabel.Visible = true
+                    onLabel.Visible = false
+                    offLabel.Position = UDim2.new(1, 0, 0, 0) -- off to right
+                    TweenService:Create(offLabel, tweenInfo, {Position = UDim2.new(0,0,0,0)}):Play()
+                    TweenService:Create(onLabel, tweenInfo, {Position = UDim2.new(-1,0,0,0)}):Play() -- on to left
+                end
+                
+                if callback then
+                    pcall(callback, isToggled)
+                end
             end
+            
+            actualButton.MouseEnter:Connect(function()
+                isHovering = true
+                if not isPressed then
+                    TweenService:Create(toggleFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemHoverBackground}):Play()
+                    TweenService:Create(toggleTextLabel, TweenInfo.new(0.1), {TextColor3 = Colors.LightText}):Play()
+                    TweenService:Create(toggleIconFrame, TweenInfo.new(0.1), {BackgroundColor3 = Colors.ContentItemIconHover}):Play()
+                    hoverStroke.Enabled = true
+                end
+            end)
+            
+            actualButton.MouseLeave:Connect(function()
+                isHovering = false
+                if not isPressed then
+                    TweenService:Create(toggleFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalBackgroundColor}):Play()
+                    TweenService:Create(toggleTextLabel, TweenInfo.new(0.1), {TextColor3 = originalToggleTextColor}):Play()
+                    TweenService:Create(toggleIconFrame, TweenInfo.new(0.1), {BackgroundColor3 = originalIconColor}):Play()
+                    hoverStroke.Enabled = false
+                    TweenService:Create(toggleFrame, TweenInfo.new(0.1), {Size = originalSize}):Play() -- if scale effect
+                end
+            end)
+
+             actualButton.MouseButton1Down:Connect(function()
+                isPressed = true
+            end)
+
+            actualButton.MouseButton1Up:Connect(function()
+                isPressed = false
+            end)
             
             actualButton.MouseButton1Click:Connect(function()
                 isToggled = not isToggled
                 updateToggleVisuals()
-                if callback then pcall(callback, isToggled) end
             end)
-            actualButton.MouseEnter:Connect(function()
-                TweenService:Create(toggleFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.SliderTrack}):Play()
-            end)
-            actualButton.MouseLeave:Connect(function()
-                TweenService:Create(toggleFrame, TweenInfo.new(0.15), {BackgroundColor3 = Colors.ContentItemBackground}):Play()
-            end)
+            
+            updateToggleVisuals()
             
             return {
                 Frame = toggleFrame,
