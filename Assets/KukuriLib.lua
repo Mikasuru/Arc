@@ -374,55 +374,83 @@ function KukuriLib:CreateWindow(title, subtitle)
             self.ScreenGui.Parent = CoreGui
         end
         self.ScreenGui.Enabled = true
-        self.MainFrame.Visible = true
         self.MainFrame.BackgroundTransparency = 1
-        self.MainFrame.Size = UDim2.new(0, 10, 0, 10)
-        self.MainFrame.Rotation = 0
+        self.MainFrame.Visible = false
 
-        local openDuration = 0.5
-        local particleDuration = openDuration * 0.8
-        local numParticles = 15
+        local animContainer = Instance.new("Frame")
+        animContainer.Name = "AnimationPanelContainer"
+        animContainer.Size = self.MainFrame.Size
+        animContainer.Position = self.MainFrame.Position
+        animContainer.AnchorPoint = self.MainFrame.AnchorPoint
+        animContainer.BackgroundTransparency = 1
+        animContainer.ClipsDescendants = true
+        animContainer.Parent = self.ScreenGui
+        animContainer.ZIndex = self.MainFrame.ZIndex -1
 
-        local mainFrameTweenInfo = TweenInfo.new(openDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-        local mainFrameScaleTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
-            Size = UDim2.new(0, 650, 0, 450),
-            BackgroundTransparency = 0,
-            Rotation = math.random(-5, 5)
-        })
-        mainFrameScaleTween:Play()
+        local numPanels = 7
+        local panelSlantAngle = -20
+        local panelOverlapFactor = 0.3
+        
+        local totalWidth = self.MainFrame.AbsoluteSize.X
+        local panelBaseWidth = totalWidth / numPanels
+        local panelDisplayWidth = panelBaseWidth * (1 + panelOverlapFactor)
 
-        local particles = {}
-        for i = 1, numParticles do
-            local p = CreateGlitchParticle()
-            p.Position = UDim2.new(0.5, 0, 0.5, 0)
-            table.insert(particles, p)
+        local panelHeight = self.MainFrame.AbsoluteSize.Y * 1.5
 
-            local targetX = 0.5 + (math.random() - 0.5) * math.random(1, 3)
-            local targetY = 0.5 + (math.random() - 0.5) * math.random(1, 3)
+        local panelAnimDuration = 0.6
+        local staggerDelay = 0.05
+
+        local allPanelTweensCompleted = 0
+        local tweensToWaitFor = numPanels
+
+        for i = 1, numPanels do
+            local panel = Instance.new("Frame")
+            panel.Name = "AnimPanel" .. i
+            panel.Size = UDim2.new(0, panelDisplayWidth, 0, panelHeight)
+            panel.AnchorPoint = Vector2.new(0, 0.5)
+            panel.Rotation = panelSlantAngle
+            panel.BackgroundColor3 = Colors.MainBackground
+            panel.BackgroundTransparency = 1
+            panel.BorderSizePixel = 0
+            panel.Parent = animContainer
+
+            local targetX = (i - 1) * panelBaseWidth - (panelBaseWidth * panelOverlapFactor * 0.5 * (i/(numPanels/2))) -- ปรับ X ให้มีการซ้อนที่ถูกต้อง
             
-            local particleTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-            local particleMoveTween = TweenService:Create(p, particleTweenInfo, {
-                Position = UDim2.new(targetX, 0, targetY, 0),
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, p.Size.X.Offset * 0.5, 0, p.Size.Y.Offset * 0.5),
-                Rotation = p.Rotation + math.random(-90, 90)
+            panel.Position = UDim2.new(0, targetX - totalWidth * 1.2, 0.5, 0)
+
+            local panelTweenInfo = TweenInfo.new(
+                panelAnimDuration, 
+                Enum.EasingStyle.Quart,
+                Enum.EasingDirection.Out
+            )
+            local panelTween = TweenService:Create(panel, panelTweenInfo, {
+                Position = UDim2.new(0, targetX, 0.5, 0),
+                BackgroundTransparency = 0
             })
-            task.delay((openDuration - particleDuration) * math.random(), function()
-                particleMoveTween:Play()
+
+            task.delay(staggerDelay * (i - 1), function()
+                panelTween:Play()
+            end)
+            
+            panelTween.Completed:Connect(function()
+                allPanelTweensCompleted = allPanelTweensCompleted + 1
+                if allPanelTweensCompleted >= tweensToWaitFor then
+                    self.MainFrame.Visible = true
+                    local mainUITweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear)
+                    local mainUITween = TweenService:Create(self.MainFrame, mainUITweenInfo, {BackgroundTransparency = 0})
+                    mainUITween:Play()
+                    
+                    mainUITween.Completed:Connect(function()
+                        animContainer:Destroy()
+                        self.IsAnimating = false
+                        self.IsOpened = true
+                        if callback then task.spawn(callback) end
+                    end)
+                end
             end)
         end
-
-        mainFrameScaleTween.Completed:Connect(function()
-            self.MainFrame.Rotation = 0
-            for _, p in ipairs(particles) do
-                p:Destroy()
-            end
-            self.IsAnimating = false
-            self.IsOpened = true
-            if callback then task.spawn(callback) end
-        end)
     end
-
+    
     function window:AnimateClose(callback)
         if self.IsAnimating or not self.IsOpened then return end
         self.IsAnimating = true
