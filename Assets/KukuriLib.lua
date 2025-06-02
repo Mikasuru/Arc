@@ -7,6 +7,108 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
+local SplashTime = 3
+
+local function createSplashScreen()
+    local player = Players.LocalPlayer
+    if not player then return end
+
+    local splashScreenGui = Instance.new("ScreenGui")
+    splashScreenGui.Name = "SplashScreen"
+    splashScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    splashScreenGui.ResetOnSpawn = false
+    splashScreenGui.IgnoreGuiInset = true
+    splashScreenGui.DisplayOrder = 999
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainSplashFrame"
+    mainFrame.Size = UDim2.new(1, 0, 1, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    mainFrame.BackgroundTransparency = 1
+    mainFrame.Parent = splashScreenGui
+
+    local viewportFrame = Instance.new("ViewportFrame")
+    viewportFrame.Name = "CubeViewport"
+    viewportFrame.Size = UDim2.new(0, 200, 0, 200)
+    viewportFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    viewportFrame.Position = UDim2.new(0.5, 0, 0.45, 0)
+    viewportFrame.BackgroundColor3 = mainFrame.BackgroundColor3
+    viewportFrame.BackgroundTransparency = 1
+    viewportFrame.Ambient = Color3.new(0.5, 0.5, 0.5)
+    viewportFrame.LightColor = Color3.new(0.8, 0.8, 0.8)
+    viewportFrame.LightDirection = Vector3.new(0.5, -1, 0.5).Unit
+    viewportFrame.Parent = mainFrame
+
+    local viewportCamera = Instance.new("Camera")
+    viewportCamera.Parent = viewportFrame
+    viewportFrame.CurrentCamera = viewportCamera
+    viewportCamera.CFrame = CFrame.new(Vector3.new(0, 0, 5), Vector3.new(0, 0, 0))
+    viewportCamera.FieldOfView = 50
+
+    local worldModel = Instance.new("WorldModel")
+    worldModel.Parent = viewportFrame
+
+    local cube = Instance.new("Part")
+    cube.Name = "SpinningCube"
+    cube.Size = Vector3.new(2.5, 2.5, 2.5)
+    cube.Anchored = true
+    cube.CanCollide = false
+    cube.Color = Color3.fromRGB(100, 180, 255)
+    cube.Material = Enum.Material.Neon
+    cube.CFrame = CFrame.new(0, 0, 0)
+    cube.Parent = worldModel
+
+    local pointLight = Instance.new("PointLight")
+    pointLight.Brightness = 1
+    pointLight.Color = Color3.new(1,1,1)
+    pointLight.Range = 10
+    pointLight.Parent = cube
+
+    local loadingLabel = Instance.new("TextLabel")
+    loadingLabel.Name = "LoadingText"
+    loadingLabel.Size = UDim2.new(0, 200, 0, 30)
+    loadingLabel.AnchorPoint = Vector2.new(0.5, 0)
+    loadingLabel.Position = UDim2.fromAnchorPoint(Enum.AnchorPoint.TopCenter, viewportFrame.Position.X, UDim.new(viewportFrame.Position.Y.Scale, viewportFrame.Position.Y.Offset + viewportFrame.Size.Y.Offset / 2 + 10))
+    loadingLabel.BackgroundTransparency = 1
+    loadingLabel.Text = "Loading..."
+    loadingLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+    loadingLabel.TextSize = 24
+    loadingLabel.Font = Enum.Font.SourceSansBold
+    loadingLabel.TextScaled = false
+    loadingLabel.Parent = mainFrame
+
+    local rotationSpeed = math.rad(90)
+    local cubeConnection
+    cubeConnection = RunService.RenderStepped:Connect(function(deltaTime)
+        if cube and cube.Parent then
+            cube.CFrame = cube.CFrame * CFrame.Angles(0, rotationSpeed * deltaTime, rotationSpeed * deltaTime * 0.7)
+        else
+            if cubeConnection then
+                cubeConnection:Disconnect()
+                cubeConnection = nil
+            end
+        end
+    end)
+
+    splashScreenGui.Parent = CoreGui
+
+    local fadeInTween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0})
+    fadeInTween:Play()
+    
+    fadeInTween.Completed:Wait()
+    task.wait(SplashTime)
+
+    local fadeOutTween = TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1})
+    fadeOutTween:Play()
+
+    fadeOutTween.Completed:Wait()
+    
+    if cubeConnection then
+        cubeConnection:Disconnect()
+        cubeConnection = nil
+    end
+    splashScreenGui:Destroy()
+end
 
 local Colors = {
     MainBackground = Color3.fromRGB(228, 223, 212),
