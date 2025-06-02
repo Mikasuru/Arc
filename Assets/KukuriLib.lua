@@ -94,7 +94,7 @@ local function SplashScreen(callbackAfterSplash)
 
     local cube = Instance.new("Part")
     cube.Name = "SpinningCube"
-    cube.Size = Vector3.new(1.8, 1.8, 1.8)
+    cube.Size = Vector3.new(1.2, 1.2, 1.2)
     cube.Anchored = true
     cube.CanCollide = false
     cube.Color = Color3.fromRGB(120, 180, 230)
@@ -112,7 +112,7 @@ local function SplashScreen(callbackAfterSplash)
 
     local rotationAngle = 0
     local rotationAxis = Vector3.new(0.5, 1, 0.2).Unit
-    local rotationSpeed = math.rad(45)
+    local rotationSpeed = math.rad(120)
     local cubeRotationConnection
     cubeRotationConnection = RunService.RenderStepped:Connect(function(deltaTime)
         if cube and cube.Parent then
