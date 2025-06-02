@@ -367,15 +367,24 @@ function KukuriLib:CreateWindow(title, subtitle)
     end
 
     function window:AnimateOpen(callback)
-        if self.IsAnimating or self.IsOpened then return end
+        if self.IsAnimating or self.IsOpened then
+            print("AnimateOpen: Already animating or opened, returning.") -- DEBUG
+            return
+        end
+        print("AnimateOpen: Starting...") -- DEBUG
         self.IsAnimating = true
         
         if not self.ScreenGui.Parent then
             self.ScreenGui.Parent = CoreGui
+            print("AnimateOpen: ScreenGui parented to CoreGui.") -- DEBUG
         end
         self.ScreenGui.Enabled = true
-        self.MainFrame.BackgroundTransparency = 1
+        print("AnimateOpen: ScreenGui Enabled.") -- DEBUG
+
+        -- MainFrame should be initially invisible and fully transparent
+        self.MainFrame.BackgroundTransparency = 1 
         self.MainFrame.Visible = false
+        print("AnimateOpen: MainFrame set to invisible and transparent.") -- DEBUG
 
         local animContainer = Instance.new("Frame")
         animContainer.Name = "AnimationPanelContainer"
@@ -383,73 +392,98 @@ function KukuriLib:CreateWindow(title, subtitle)
         animContainer.Position = self.MainFrame.Position
         animContainer.AnchorPoint = self.MainFrame.AnchorPoint
         animContainer.BackgroundTransparency = 1
-        animContainer.ClipsDescendants = true
+        animContainer.ClipsDescendants = true 
+        animContainer.ZIndex = self.MainFrame.ZIndex -- ลองให้ ZIndex เท่ากันก่อน
         animContainer.Parent = self.ScreenGui
-        animContainer.ZIndex = self.MainFrame.ZIndex -1
+        print("AnimateOpen: animContainer created.") -- DEBUG
 
-        local numPanels = 7
-        local panelSlantAngle = -20
-        local panelOverlapFactor = 0.3
+        local numPanels = 7 
+        local panelSlantAngle = -20 
+        local panelOverlapFactor = 0.3 
         
         local totalWidth = self.MainFrame.AbsoluteSize.X
-        local panelBaseWidth = totalWidth / numPanels
-        local panelDisplayWidth = panelBaseWidth * (1 + panelOverlapFactor)
+        if totalWidth == 0 then -- Fallback if AbsoluteSize is not ready
+            totalWidth = self.MainFrame.Size.X.Offset
+            print("AnimateOpen: Warning - MainFrame.AbsoluteSize.X was 0, using Offset.") -- DEBUG
+        end
+        if totalWidth == 0 then
+             warn("AnimateOpen: CRITICAL - totalWidth is still 0, animation might not work correctly.") -- DEBUG
+             self.IsAnimating = false
+             return
+        end
 
-        local panelHeight = self.MainFrame.AbsoluteSize.Y * 1.5
+        local panelBaseWidth = totalWidth / numPanels
+        local panelDisplayWidth = panelBaseWidth * (1 + panelOverlapFactor) 
+        local panelHeight = self.MainFrame.AbsoluteSize.Y * 1.5 
+        if panelHeight == 0 then panelHeight = self.MainFrame.Size.Y.Offset * 1.5 end
+
 
         local panelAnimDuration = 0.6
-        local staggerDelay = 0.05
+        local staggerDelay = 0.05 
 
-        local allPanelTweensCompleted = 0
+        local completedPanelTweens = 0 -- Changed variable name for clarity
         local tweensToWaitFor = numPanels
 
         for i = 1, numPanels do
             local panel = Instance.new("Frame")
             panel.Name = "AnimPanel" .. i
             panel.Size = UDim2.new(0, panelDisplayWidth, 0, panelHeight)
-            panel.AnchorPoint = Vector2.new(0, 0.5)
+            panel.AnchorPoint = Vector2.new(0, 0.5) 
             panel.Rotation = panelSlantAngle
-            panel.BackgroundColor3 = Colors.MainBackground
-            panel.BackgroundTransparency = 0
+            panel.BackgroundColor3 = Colors.MainBackground 
+            panel.BackgroundTransparency = 1 
             panel.BorderSizePixel = 0
             panel.Parent = animContainer
 
-            local targetX = (i - 1) * panelBaseWidth - (panelBaseWidth * panelOverlapFactor * 0.5 * (i/(numPanels/2))) -- ปรับ X ให้มีการซ้อนที่ถูกต้อง
-            
-            panel.Position = UDim2.new(0, targetX - totalWidth * 1.2, 0.5, 0)
+            local targetX = (i - 1) * panelBaseWidth - (panelBaseWidth * panelOverlapFactor * 0.5 * (i/(numPanels * 0.5))) 
+            panel.Position = UDim2.new(0, targetX - totalWidth * 1.2, 0.5, 0) 
+            print("AnimateOpen: Panel " .. i .. " created. StartPos: " .. tostring(panel.Position) .. ", TargetX: " .. targetX) -- DEBUG
 
             local panelTweenInfo = TweenInfo.new(
                 panelAnimDuration, 
-                Enum.EasingStyle.Quart,
+                Enum.EasingStyle.Quart, 
                 Enum.EasingDirection.Out
             )
             local panelTween = TweenService:Create(panel, panelTweenInfo, {
                 Position = UDim2.new(0, targetX, 0.5, 0),
-                BackgroundTransparency = 0
+                BackgroundTransparency = 0 
             })
 
             task.delay(staggerDelay * (i - 1), function()
-                panelTween:Play()
+                if panel and panel.Parent then -- Check if panel still exists
+                    print("AnimateOpen: Playing tween for Panel " .. i) -- DEBUG
+                    panelTween:Play()
+                end
             end)
             
             panelTween.Completed:Connect(function()
-                allPanelTweensCompleted = allPanelTweensCompleted + 1
-                print("Panel " .. panel.Name .. " completed. Total completed: " .. allPanelTweensCompleted .. "/" .. tweensToWaitFor)
-                if allPanelTweensCompleted >= tweensToWaitFor then
-                    print("All panels completed! Showing main UI.")
+                completedPanelTweens = completedPanelTweens + 1
+                print("AnimateOpen: Panel " .. i .. " tween completed. Total: " .. completedPanelTweens) -- DEBUG
+                if completedPanelTweens >= tweensToWaitFor then
+                    print("AnimateOpen: All panels completed. Showing MainFrame.") -- DEBUG
                     self.MainFrame.Visible = true
                     local mainUITweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear)
                     local mainUITween = TweenService:Create(self.MainFrame, mainUITweenInfo, {BackgroundTransparency = 0})
                     mainUITween:Play()
                     
                     mainUITween.Completed:Connect(function()
-                        animContainer:Destroy()
+                        print("AnimateOpen: MainFrame tween completed. Destroying animContainer.") -- DEBUG
+                        if animContainer and animContainer.Parent then animContainer:Destroy() end
                         self.IsAnimating = false
                         self.IsOpened = true
+                        print("AnimateOpen: Animation finished. IsOpened: true") -- DEBUG
                         if callback then task.spawn(callback) end
                     end)
                 end
             end)
+        end
+        if numPanels == 0 then -- Handle case of no panels
+            print("AnimateOpen: No panels to animate, showing MainFrame directly.") --DEBUG
+            self.MainFrame.Visible = true
+            self.MainFrame.BackgroundTransparency = 0
+            self.IsAnimating = false
+            self.IsOpened = true
+            if callback then task.spawn(callback) end
         end
     end
     
