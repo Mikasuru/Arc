@@ -207,8 +207,9 @@ function KukuriLib:CreateWindow(title, subtitle)
     screenGui.Name = "KukuriLib_Redesigned"
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     screenGui.ResetOnSpawn = false
-    screenGui.Enabled = true
-
+    screenGui.Enabled = false
+    screenGui.IgnoreGuiInset = true
+    
     mainScreenGuiInstance = screenGui
     
     local mainFrame = Instance.new("Frame")
@@ -217,11 +218,11 @@ function KukuriLib:CreateWindow(title, subtitle)
     mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.BackgroundColor3 = Colors.TabContainerBackground 
-    mainFrame.BackgroundTransparency = 0
+    mainFrame.BackgroundTransparency = 1
     mainFrame.BorderSizePixel = 1
     mainFrame.BorderColor3 = Colors.MainFrameOuterBorder
     mainFrame.ClipsDescendants = true
-    mainFrame.Visible = true
+    mainFrame.Visible = false
     mainFrame.Parent = screenGui
     
     local titleBar = Instance.new("Frame")
@@ -329,13 +330,15 @@ function KukuriLib:CreateWindow(title, subtitle)
     end)
 
     local uiToggleConnection
-        uiToggleConnection = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-        if gameProcessedEvent then
-            return
-        end
+    uiToggleConnection = UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+        if gameProcessedEvent then return end
 
         if input.KeyCode == Enum.KeyCode.LeftControl then
-            screenGui.Enabled = not screenGui.Enabled
+            if window.IsOpened then
+                window:AnimateClose()
+            else
+                window:AnimateOpen()
+            end
         end
     end)
     
@@ -347,6 +350,126 @@ function KukuriLib:CreateWindow(title, subtitle)
     window.TabTitleLabel = tabTitleLabel
     window.CurrentTabContent = nil
     window.Tabs = {}
+    window.IsAnimating = false
+    window.IsOpened = false
+
+    local function CreateGlitchParticle()
+        local particle = Instance.new("Frame")
+        particle.AnchorPoint = Vector2.new(0.5, 0.5)
+        particle.Size = UDim2.new(0, math.random(5, 20), 0, math.random(5, 20))
+        particle.BackgroundColor3 = Colors.DarkPrimary
+        particle.Rotation = math.random(0, 360)
+        particle.BackgroundTransparency = 0.2
+        particle.BorderSizePixel = 0
+        particle.ZIndex = mainFrame.ZIndex + 1
+        particle.Parent = mainFrame
+        return particle
+    end
+
+    function window:AnimateOpen(callback)
+        if self.IsAnimating or self.IsOpened then return end
+        self.IsAnimating = true
+        
+        if not self.ScreenGui.Parent then
+            self.ScreenGui.Parent = CoreGui
+        end
+        self.ScreenGui.Enabled = true
+        self.MainFrame.Visible = true
+        self.MainFrame.BackgroundTransparency = 1
+        self.MainFrame.Size = UDim2.new(0, 10, 0, 10)
+        self.MainFrame.Rotation = 0
+
+        local openDuration = 0.5
+        local particleDuration = openDuration * 0.8
+        local numParticles = 15
+
+        local mainFrameTweenInfo = TweenInfo.new(openDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+        local mainFrameScaleTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
+            Size = UDim2.new(0, 650, 0, 450),
+            BackgroundTransparency = 0,
+            Rotation = math.random(-5, 5)
+        })
+        mainFrameScaleTween:Play()
+
+        local particles = {}
+        for i = 1, numParticles do
+            local p = CreateGlitchParticle()
+            p.Position = UDim2.new(0.5, 0, 0.5, 0)
+            table.insert(particles, p)
+
+            local targetX = 0.5 + (math.random() - 0.5) * math.random(1, 3)
+            local targetY = 0.5 + (math.random() - 0.5) * math.random(1, 3)
+            
+            local particleTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+            local particleMoveTween = TweenService:Create(p, particleTweenInfo, {
+                Position = UDim2.new(targetX, 0, targetY, 0),
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0, p.Size.X.Offset * 0.5, 0, p.Size.Y.Offset * 0.5),
+                Rotation = p.Rotation + math.random(-90, 90)
+            })
+            task.delay((openDuration - particleDuration) * math.random(), function()
+                particleMoveTween:Play()
+            end)
+        end
+
+        mainFrameScaleTween.Completed:Connect(function()
+            self.MainFrame.Rotation = 0
+            for _, p in ipairs(particles) do
+                p:Destroy()
+            end
+            self.IsAnimating = false
+            self.IsOpened = true
+            if callback then task.spawn(callback) end
+        end)
+    end
+
+    function window:AnimateClose(callback)
+        if self.IsAnimating or not self.IsOpened then return end
+        self.IsAnimating = true
+
+        local closeDuration = 0.4
+        local particleDuration = closeDuration * 0.8
+        local numParticles = 12
+
+        local particles = {}
+        for i = 1, numParticles do
+            local p = CreateGlitchParticle()
+            local startX = 0.5 + (math.random() - 0.5) * 1.2
+            local startY = 0.5 + (math.random() - 0.5) * 1.2
+            p.Position = UDim2.new(startX, 0, startY, 0)
+            p.BackgroundTransparency = 0.3
+            table.insert(particles, p)
+
+            local particleTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+            local particleMoveTween = TweenService:Create(p, particleTweenInfo, {
+                Position = UDim2.new(0.5, 0, 0.5, 0),
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0,1,0,1)
+            })
+             task.delay(math.random() * (closeDuration - particleDuration) * 0.5, function()
+                particleMoveTween:Play()
+            end)
+        end
+
+        local mainFrameTweenInfo = TweenInfo.new(closeDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+        local mainFrameScaleTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
+            Size = UDim2.new(0, 20, 0, 20),
+            BackgroundTransparency = 1,
+            Rotation = self.MainFrame.Rotation + math.random(-10, 10)
+        })
+        mainFrameScaleTween:Play()
+        
+        mainFrameScaleTween.Completed:Connect(function()
+            self.MainFrame.Visible = false
+            self.ScreenGui.Enabled = false
+            for _, p in ipairs(particles) do
+                p:Destroy()
+            end
+            self.IsAnimating = false
+            self.IsOpened = false
+            if callback then task.spawn(callback) end
+        end)
+    end
     
     function window:CreateTab(name)
         local tab = {}
@@ -1075,22 +1198,33 @@ function KukuriLib:CreateWindow(title, subtitle)
         return tab
     end
 
+    function window:Destroy()
+        if uiToggleConnection then
+            uiToggleConnection:Disconnect()
+            uiToggleConnection = nil
+        end
+        if self.ScreenGui then
+            self.ScreenGui:Destroy()
+        end
+    end
+    
     function window:Show()
         if not self.ScreenGui.Parent then
             self.ScreenGui.Parent = CoreGui
         end
-        self.ScreenGui.Enabled = true
+        self:AnimateOpen()
     end
 
     function window:Hide()
-        self.ScreenGui.Enabled = false
+        self:AnimateClose()
     end
 
     function window:Toggle()
-        if not self.ScreenGui.Parent then
-            self.ScreenGui.Parent = CoreGui
+        if self.IsOpened then
+            self:AnimateClose()
+        else
+            self:AnimateOpen()
         end
-        self.ScreenGui.Enabled = not self.ScreenGui.Enabled
     end
     
     return window
