@@ -378,393 +378,49 @@ function KukuriLib:CreateWindow(title, subtitle)
         self.MainFrame.BackgroundTransparency = 1
         self.MainFrame.Size = UDim2.new(0, 10, 0, 10)
         self.MainFrame.Rotation = 0
-        
-        -- Star Glitcher style configuration
-        local openDuration = 0.8
-        local particleDuration = openDuration * 0.9
-        local numParticles = 25
-        local numStars = 12
-        local numGlitchLines = 8
-        local numLightningBolts = 6
-        
-        -- Create cosmic background flash with multiple layers
-        local cosmicFlash = Instance.new("Frame")
-        cosmicFlash.Size = UDim2.new(2, 0, 2, 0)
-        cosmicFlash.Position = UDim2.new(-0.5, 0, -0.5, 0)
-        cosmicFlash.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-        cosmicFlash.BackgroundTransparency = 1
-        cosmicFlash.BorderSizePixel = 0
-        cosmicFlash.Parent = self.MainFrame
-        
-        local flashGradient = Instance.new("UIGradient")
-        flashGradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 255)),
-            ColorSequenceKeypoint.new(0.3, Color3.fromRGB(138, 43, 226)),
-            ColorSequenceKeypoint.new(0.7, Color3.fromRGB(0, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(148, 0, 211))
-        }
-        flashGradient.Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.5, 0.2),
-            NumberSequenceKeypoint.new(1, 1)
-        }
-        flashGradient.Parent = cosmicFlash
-        
-        -- Create rotating energy ring
-        local energyRing = Instance.new("Frame")
-        energyRing.Size = UDim2.new(0, 200, 0, 200)
-        energyRing.Position = UDim2.new(0.5, -100, 0.5, -100)
-        energyRing.BackgroundTransparency = 1
-        energyRing.Parent = self.MainFrame
-        
-        local ringBorder = Instance.new("UIStroke")
-        ringBorder.Color = Color3.fromRGB(0, 255, 255)
-        ringBorder.Thickness = 4
-        ringBorder.Transparency = 0.3
-        ringBorder.Parent = energyRing
-        
-        local ringCorner = Instance.new("UICorner")
-        ringCorner.CornerRadius = UDim.new(1, 0)
-        ringCorner.Parent = energyRing
-        
-        -- Main frame animation with enhanced effects
-        local mainFrameTweenInfo = TweenInfo.new(openDuration, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+        local openDuration = 0.5
+        local particleDuration = openDuration * 0.8
+        local numParticles = 15
+
+        local mainFrameTweenInfo = TweenInfo.new(openDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
         local mainFrameScaleTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
             Size = UDim2.new(0, 650, 0, 450),
             BackgroundTransparency = 0,
-            Rotation = math.random(-3, 3)
+            Rotation = math.random(-5, 5)
         })
-        
-        -- Energy ring rotation
-        local ringRotationTween = TweenService:Create(energyRing, TweenInfo.new(openDuration, Enum.EasingStyle.Linear), {
-            Rotation = 360
-        })
-        local ringScaleTween = TweenService:Create(energyRing, TweenInfo.new(openDuration * 0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 400, 0, 400),
-            Position = UDim2.new(0.5, -200, 0.5, -200)
-        })
-        local ringFadeTween = TweenService:Create(ringBorder, TweenInfo.new(openDuration * 0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Transparency = 1
-        })
-        
-        -- Cosmic flash animation
-        local flashTween = TweenService:Create(cosmicFlash, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundTransparency = 0.6
-        })
-        local flashFadeTween = TweenService:Create(cosmicFlash, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            BackgroundTransparency = 1
-        })
-        
-        -- Start main animations
         mainFrameScaleTween:Play()
-        flashTween:Play()
-        ringRotationTween:Play()
-        ringScaleTween:Play()
-        
-        task.delay(0.3, function()
-            flashFadeTween:Play()
-        end)
-        task.delay(0.4, function()
-            ringFadeTween:Play()
-        end)
-        
-        -- Create custom star glitcher particles
+
         local particles = {}
         for i = 1, numParticles do
-            local p = CreateCustomStarGlitchParticle()
-            p.Position = UDim2.new(0.5, math.random(-30, 30), 0.5, math.random(-30, 30))
-            p.Parent = self.MainFrame
+            local p = CreateGlitchParticle()
+            p.Position = UDim2.new(0.5, 0, 0.5, 0)
             table.insert(particles, p)
+
+            local targetX = 0.5 + (math.random() - 0.5) * math.random(1, 3)
+            local targetY = 0.5 + (math.random() - 0.5) * math.random(1, 3)
             
-            local targetX = 0.5 + (math.random() - 0.5) * math.random(2, 5)
-            local targetY = 0.5 + (math.random() - 0.5) * math.random(2, 5)
-            
-            local pTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-            local pMoveTween = TweenService:Create(p, pTweenInfo, {
+            local particleTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+            local particleMoveTween = TweenService:Create(p, particleTweenInfo, {
                 Position = UDim2.new(targetX, 0, targetY, 0),
                 BackgroundTransparency = 1,
-                Size = UDim2.new(0, p.Size.X.Offset * 0.2, 0, p.Size.Y.Offset * 0.2),
-                Rotation = p.Rotation + math.random(-270, 270)
+                Size = UDim2.new(0, p.Size.X.Offset * 0.5, 0, p.Size.Y.Offset * 0.5),
+                Rotation = p.Rotation + math.random(-90, 90)
             })
-            
-            -- Animate particle glow
-            local pGlow = p:FindFirstChild("UIStroke")
-            if pGlow then
-                local pGlowTween = TweenService:Create(pGlow, pTweenInfo, {
-                    Transparency = 1,
-                    Thickness = pGlow.Thickness * 0.3
-                })
-                task.delay((openDuration - particleDuration) * math.random(0.2, 0.8), function()
-                    pGlowTween:Play()
-                end)
-            end
-            
-            task.delay((openDuration - particleDuration) * math.random(0.3, 0.8), function()
-                pMoveTween:Play()
+            task.delay((openDuration - particleDuration) * math.random(), function()
+                particleMoveTween:Play()
             end)
         end
-        
-        -- Create custom star shapes
-        local stars = {}
-        for i = 1, numStars do
-            local star = CreateCustomStarShape()
-            star.Position = UDim2.new(0.5, 0, 0.5, 0)
-            star.Parent = self.MainFrame
-            table.insert(stars, star)
-            
-            local angle = (i / numStars) * math.pi * 2
-            local distance = math.random(180, 350)
-            local targetX = 0.5 + math.cos(angle) * distance / 650
-            local targetY = 0.5 + math.sin(angle) * distance / 450
-            
-            local sTween = TweenService:Create(star, TweenInfo.new(particleDuration * 0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = UDim2.new(targetX, 0, targetY, 0),
-                BackgroundTransparency = 1,
-                Rotation = star.Rotation + math.random(-180, 180)
-            })
-            
-            -- Animate star glow
-            local sGlow = star:FindFirstChild("UIStroke")
-            if sGlow then
-                local sGlowTween = TweenService:Create(sGlow, TweenInfo.new(particleDuration * 0.8, Enum.EasingStyle.Quad), {
-                    Transparency = 1
-                })
-                task.delay(math.random() * 0.4, function()
-                    sGlowTween:Play()
-                end)
-            end
-            
-            task.delay(math.random() * 0.4, function()
-                sTween:Play()
-            end)
-        end
-        
-        -- Create custom lightning bolts
-        local lightningBolts = {}
-        for i = 1, numLightningBolts do
-            local bolt = CreateCustomLightningBolt()
-            bolt.Parent = self.MainFrame
-            table.insert(lightningBolts, bolt)
-            
-            task.delay(math.random() * 0.6, function()
-                local bTween = TweenService:Create(bolt, TweenInfo.new(0.3, Enum.EasingStyle.Linear), {
-                    BackgroundTransparency = 1
-                })
-                bTween:Play()
-            end)
-        end
-        
-        -- Create glitch lines with enhanced effects
-        local glitchLines = {}
-        for i = 1, numGlitchLines do
-            local line = CreateCustomGlitchLine()
-            line.Parent = self.MainFrame
-            table.insert(glitchLines, line)
-            
-            task.delay(math.random() * 0.5, function()
-                local lTween = TweenService:Create(line, TweenInfo.new(0.25, Enum.EasingStyle.Linear), {
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(line.Size.X.Scale * 1.5, line.Size.X.Offset, line.Size.Y.Scale, line.Size.Y.Offset * 2)
-                })
-                lTween:Play()
-            end)
-        end
-        
-        -- Enhanced screen shake with cosmic tremor
-        for i = 1, 8 do
-            task.delay(i * 0.08, function()
-                local intensity = (8 - i) / 8 * 5
-                local shakeX = math.random(-intensity, intensity)
-                local shakeY = math.random(-intensity, intensity)
-                self.MainFrame.Position = UDim2.new(0.5, shakeX, 0.5, shakeY)
-                task.wait(0.04)
-                self.MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-            end)
-        end
-        
+
         mainFrameScaleTween.Completed:Connect(function()
             self.MainFrame.Rotation = 0
-            cosmicFlash:Destroy()
-            energyRing:Destroy()
-            
             for _, p in ipairs(particles) do
                 p:Destroy()
             end
-            for _, s in ipairs(stars) do
-                s:Destroy()
-            end
-            for _, b in ipairs(lightningBolts) do
-                b:Destroy()
-            end
-            for _, l in ipairs(glitchLines) do
-                l:Destroy()
-            end
-            
             self.IsAnimating = false
             self.IsOpened = true
             if callback then task.spawn(callback) end
         end)
-    end
-    
-    -- Create custom Star Glitcher style particles
-    function CreateCustomStarGlitchParticle()
-        local particle = Instance.new("Frame")
-        particle.Size = UDim2.new(0, math.random(10, 18), 0, math.random(10, 18))
-        particle.BorderSizePixel = 0
-        particle.Rotation = math.random(0, 360)
-        
-        -- Cosmic color palette
-        local colors = {
-            Color3.fromRGB(255, 0, 255),    -- Bright Magenta
-            Color3.fromRGB(0, 255, 255),    -- Bright Cyan
-            Color3.fromRGB(138, 43, 226),   -- Blue Violet
-            Color3.fromRGB(255, 20, 147),   -- Deep Pink
-            Color3.fromRGB(0, 191, 255),    -- Deep Sky Blue
-            Color3.fromRGB(148, 0, 211),    -- Dark Violet
-            Color3.fromRGB(255, 105, 180),  -- Hot Pink
-            Color3.fromRGB(64, 224, 255)    -- Electric Blue
-        }
-        particle.BackgroundColor3 = colors[math.random(1, #colors)]
-        
-        -- Multi-layer glow effect
-        local outerGlow = Instance.new("UIStroke")
-        outerGlow.Color = particle.BackgroundColor3
-        outerGlow.Thickness = math.random(3, 6)
-        outerGlow.Transparency = 0.2
-        outerGlow.Parent = particle
-        
-        -- Inner gradient
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-            ColorSequenceKeypoint.new(1, particle.BackgroundColor3)
-        }
-        gradient.Parent = particle
-        
-        -- Rounded corners
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, math.random(2, 8))
-        corner.Parent = particle
-        
-        return particle
-    end
-    
-    -- Create custom star shape using multiple frames
-    function CreateCustomStarShape()
-        local starContainer = Instance.new("Frame")
-        starContainer.Size = UDim2.new(0, 20, 0, 20)
-        starContainer.BackgroundTransparency = 1
-        starContainer.Rotation = math.random(0, 360)
-        
-        -- Create star using 4 diamond shapes
-        for i = 1, 4 do
-            local ray = Instance.new("Frame")
-            ray.Size = UDim2.new(0, 16, 0, 4)
-            ray.Position = UDim2.new(0.5, -8, 0.5, -2)
-            ray.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            ray.BorderSizePixel = 0
-            ray.Rotation = (i - 1) * 45
-            ray.Parent = starContainer
-            
-            local rayCorner = Instance.new("UICorner")
-            rayCorner.CornerRadius = UDim.new(0, 2)
-            rayCorner.Parent = ray
-            
-            local rayGlow = Instance.new("UIStroke")
-            rayGlow.Color = Color3.fromRGB(200, 200, 255)
-            rayGlow.Thickness = 2
-            rayGlow.Transparency = 0.3
-            rayGlow.Parent = ray
-        end
-        
-        -- Center core
-        local core = Instance.new("Frame")
-        core.Size = UDim2.new(0, 6, 0, 6)
-        core.Position = UDim2.new(0.5, -3, 0.5, -3)
-        core.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        core.BorderSizePixel = 0
-        core.Parent = starContainer
-        
-        local coreCorner = Instance.new("UICorner")
-        coreCorner.CornerRadius = UDim.new(1, 0)
-        coreCorner.Parent = core
-        
-        local coreGlow = Instance.new("UIStroke")
-        coreGlow.Color = Color3.fromRGB(150, 255, 255)
-        coreGlow.Thickness = 3
-        coreGlow.Transparency = 0.1
-        coreGlow.Parent = core
-        
-        return starContainer
-    end
-    
-    -- Create custom lightning bolt using zigzag frames
-    function CreateCustomLightningBolt()
-        local bolt = Instance.new("Frame")
-        bolt.Size = UDim2.new(0, math.random(80, 150), 0, math.random(3, 6))
-        bolt.Position = UDim2.new(math.random() * 0.8 + 0.1, 0, math.random() * 0.8 + 0.1, 0)
-        bolt.BackgroundColor3 = Color3.fromRGB(255, 255, math.random(100, 255))
-        bolt.BorderSizePixel = 0
-        bolt.Rotation = math.random(-30, 30)
-        
-        -- Lightning glow
-        local boltGlow = Instance.new("UIStroke")
-        boltGlow.Color = Color3.fromRGB(200, 255, 255)
-        boltGlow.Thickness = 4
-        boltGlow.Transparency = 0.2
-        boltGlow.Parent = bolt
-        
-        -- Create zigzag segments
-        for i = 1, 3 do
-            local segment = Instance.new("Frame")
-            segment.Size = UDim2.new(0, math.random(20, 40), 0, math.random(2, 4))
-            segment.Position = UDim2.new(i * 0.25, math.random(-10, 10), 0.5, math.random(-5, 5))
-            segment.BackgroundColor3 = bolt.BackgroundColor3
-            segment.BorderSizePixel = 0
-            segment.Rotation = math.random(-45, 45)
-            segment.Parent = bolt
-            
-            local segGlow = Instance.new("UIStroke")
-            segGlow.Color = boltGlow.Color
-            segGlow.Thickness = 2
-            segGlow.Transparency = 0.3
-            segGlow.Parent = segment
-        end
-        
-        return bolt
-    end
-    
-    -- Create custom glitch line with noise effect
-    function CreateCustomGlitchLine()
-        local line = Instance.new("Frame")
-        line.Size = UDim2.new(math.random() * 0.6 + 0.2, 0, 0, math.random(2, 5))
-        line.Position = UDim2.new(math.random() * 0.8 + 0.1, 0, math.random(), 0)
-        line.BorderSizePixel = 0
-        
-        -- Glitch colors (RGB noise)
-        local glitchColors = {
-            Color3.fromRGB(255, 0, 0),      -- Red
-            Color3.fromRGB(0, 255, 0),      -- Green  
-            Color3.fromRGB(0, 0, 255),      -- Blue
-            Color3.fromRGB(255, 0, 255),    -- Magenta
-            Color3.fromRGB(0, 255, 255),    -- Cyan
-            Color3.fromRGB(255, 255, 0)     -- Yellow
-        }
-        line.BackgroundColor3 = glitchColors[math.random(1, #glitchColors)]
-        line.BackgroundTransparency = math.random() * 0.3 + 0.2
-        
-        -- Add noise segments
-        for i = 1, math.random(2, 4) do
-            local noise = Instance.new("Frame")
-            noise.Size = UDim2.new(math.random() * 0.3 + 0.1, 0, 1, 0)
-            noise.Position = UDim2.new(math.random() * 0.7, 0, 0, 0)
-            noise.BackgroundColor3 = glitchColors[math.random(1, #glitchColors)]
-            noise.BorderSizePixel = 0
-            noise.BackgroundTransparency = math.random() * 0.4 + 0.1
-            noise.Parent = line
-        end
-        
-        return line
     end
 
     function window:AnimateClose(callback)
