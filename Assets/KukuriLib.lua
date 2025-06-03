@@ -369,54 +369,78 @@ function KukuriLib:CreateWindow(title, subtitle)
     function window:AnimateOpen(callback)
         if self.IsAnimating or self.IsOpened then return end
         self.IsAnimating = true
-        
+    
         if not self.ScreenGui.Parent then
             self.ScreenGui.Parent = CoreGui
         end
+    
         self.ScreenGui.Enabled = true
         self.MainFrame.Visible = true
         self.MainFrame.BackgroundTransparency = 1
         self.MainFrame.Size = UDim2.new(0, 10, 0, 10)
         self.MainFrame.Rotation = 0
-
-        local openDuration = 0.5
-        local particleDuration = openDuration * 0.8
-        local numParticles = 15
-
-        local mainFrameTweenInfo = TweenInfo.new(openDuration, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-        local mainFrameScaleTween = TweenService:Create(self.MainFrame, mainFrameTweenInfo, {
+        self.MainFrame.BorderSizePixel = 0
+    
+        local openDuration = 0.6
+        local numParticles = 20
+    
+        local glitchBorder = Instance.new("UIStroke")
+        glitchBorder.Color = Color3.fromRGB(0, 255, 150)
+        glitchBorder.Thickness = 2
+        glitchBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        glitchBorder.Transparency = 0.5
+        glitchBorder.Parent = self.MainFrame
+    
+        local glitchAnim
+        glitchAnim = game:GetService("RunService").RenderStepped:Connect(function()
+            glitchBorder.Thickness = 2 + math.random()
+            glitchBorder.Transparency = 0.4 + math.random() * 0.2
+            glitchBorder.Color = Color3.fromRGB(0, 255 - math.random(0, 50), 150 + math.random(0, 50))
+        end)
+    
+        local tweenMain = TweenService:Create(self.MainFrame, TweenInfo.new(openDuration, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
             Size = UDim2.new(0, 650, 0, 450),
             BackgroundTransparency = 0,
-            Rotation = math.random(-5, 5)
+            Rotation = math.random(-10, 10)
         })
-        mainFrameScaleTween:Play()
-
+        tweenMain:Play()
+    
         local particles = {}
         for i = 1, numParticles do
-            local p = CreateGlitchParticle()
+            local p = Instance.new("Frame")
+            p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(10, 20))
             p.Position = UDim2.new(0.5, 0, 0.5, 0)
+            p.AnchorPoint = Vector2.new(0.5, 0.5)
+            p.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+            p.BackgroundTransparency = 0
+            p.Rotation = math.random(0, 360)
+            p.BorderSizePixel = 0
+            p.Parent = self.MainFrame
             table.insert(particles, p)
-
-            local targetX = 0.5 + (math.random() - 0.5) * math.random(1, 3)
-            local targetY = 0.5 + (math.random() - 0.5) * math.random(1, 3)
-            
-            local particleTweenInfo = TweenInfo.new(particleDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-            local particleMoveTween = TweenService:Create(p, particleTweenInfo, {
-                Position = UDim2.new(targetX, 0, targetY, 0),
+    
+            local offsetX = math.random(-300, 300)
+            local offsetY = math.random(-200, 200)
+            local tween = TweenService:Create(p, TweenInfo.new(0.4, Enum.EasingStyle.Linear), {
+                Position = UDim2.new(0.5, offsetX, 0.5, offsetY),
                 BackgroundTransparency = 1,
-                Size = UDim2.new(0, p.Size.X.Offset * 0.5, 0, p.Size.Y.Offset * 0.5),
-                Rotation = p.Rotation + math.random(-90, 90)
+                Size = UDim2.new(0, 1, 0, 1),
+                Rotation = p.Rotation + math.random(-180, 180)
             })
-            task.delay((openDuration - particleDuration) * math.random(), function()
-                particleMoveTween:Play()
+    
+            task.delay(math.random() * 0.3, function()
+                tween:Play()
             end)
         end
-
-        mainFrameScaleTween.Completed:Connect(function()
+    
+        tweenMain.Completed:Connect(function()
             self.MainFrame.Rotation = 0
+            glitchAnim:Disconnect()
+            glitchBorder:Destroy()
+    
             for _, p in ipairs(particles) do
                 p:Destroy()
             end
+    
             self.IsAnimating = false
             self.IsOpened = true
             if callback then task.spawn(callback) end
