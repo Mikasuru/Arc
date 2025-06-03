@@ -52,6 +52,7 @@ local function SplashScreen(callbackAfterSplash)
     local square1 = Instance.new("Frame")
     square1.Name = "StarSquare1"
     square1.Size = UDim2.new(0.7071, 0, 0.7071, 0)
+    
     square1.AnchorPoint = Vector2.new(0.5, 0.5)
     square1.Position = UDim2.new(0.5, 0, 0.5, 0)
     square1.BackgroundColor3 = starColor
@@ -90,6 +91,7 @@ local function SplashScreen(callbackAfterSplash)
     if viewportFrame then
         local cameraPosition = Vector3.new(0, 1.5, 3.5)
         local lookAtPosition = Vector3.new(0, 0, 0)
+        
         viewportCamera.CFrame = CFrame.new(cameraPosition, lookAtPosition)
         viewportCamera.FieldOfView = 30
     end
@@ -115,42 +117,6 @@ local function SplashScreen(callbackAfterSplash)
     pointLight.Range = 7
     pointLight.Parent = cube
 
-    local pleaseWaitLabel = Instance.new("TextLabel")
-    pleaseWaitLabel.Name = "PleaseWaitLabel"
-    pleaseWaitLabel.Size = UDim2.new(0, 300, 0, 30)
-    pleaseWaitLabel.Position = UDim2.new(
-        0.5, 0,
-        0.5, starBottomYOffset + labelOffsetY + labelHeightHalf
-    )
-    pleaseWaitLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-    pleaseWaitLabel.BackgroundTransparency = 1
-    pleaseWaitLabel.Text = "PLEASE WAIT..."
-    pleaseWaitLabel.Font = Enum.Font.SourceSansSemibold 
-    pleaseWaitLabel.TextColor3 = Colors and Colors.DarkPrimary or Color3.fromRGB(60, 55, 50)
-    pleaseWaitLabel.TextSize = 18
-    pleaseWaitLabel.TextTransparency = 1 
-    pleaseWaitLabel.TextXAlignment = Enum.TextXAlignment.Center
-    pleaseWaitLabel.ZIndex = starContainer.ZIndex + 1 
-    pleaseWaitLabel.Parent = mainContainer
-
-    local starBottomYOffset = splashOverallSize * 0.5
-    if type(starBottomYOffset) ~= "number" then
-        warn("SplashScreen DEBUG: starBottomYOffset is not a number! Value: ", starBottomYOffset, " (Type: ", type(starBottomYOffset), ")")
-        starBottomYOffset = 0
-    end
-    local labelOffsetY = 15
-    if type(labelOffsetY) ~= "number" then
-        warn("SplashScreen DEBUG: labelOffsetY is not a number! Value: ", labelOffsetY)
-        labelOffsetY = 0
-    end
-    local labelHeightHalf = pleaseWaitLabel.Size.Y.Offset * 0.5
-    if type(labelHeightHalf) ~= "number" then
-        warn("SplashScreen DEBUG: labelHeightHalf is not a number! Value: ", labelHeightHalf, " (because pleaseWaitLabel.Size.Y.Offset is ", pleaseWaitLabel.Size.Y.Offset, ")")
-        labelHeightHalf = 0
-    elseif pleaseWaitLabel.Size.Y.Offset <= 0 then
-         warn("SplashScreen DEBUG: pleaseWaitLabel.Size.Y.Offset is zero or negative, labelHeightHalf will be <= 0. Value: ", pleaseWaitLabel.Size.Y.Offset)
-    end
-    
     local rotationAngle = 0
     local rotationAxis = Vector3.new(0.5, 1, 0.2).Unit
     local rotationSpeed = math.rad(120)
@@ -166,66 +132,30 @@ local function SplashScreen(callbackAfterSplash)
 
     splashScreenGui.Parent = CoreGui
 
-    local fadeInDuration = 0.8
-    local holdDuration = SplashTime
-    local fadeOutDuration = 0.6
-    local textFadeInDelay = fadeInDuration * 0.4
-
-    local tweenInfoFadeIn = TweenInfo.new(fadeInDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local square1FadeIn = TweenService:Create(square1, tweenInfoFadeIn, {BackgroundTransparency = 0})
-    local square2FadeIn = TweenService:Create(square2, tweenInfoFadeIn, {BackgroundTransparency = 0})
-    local cubeFadeIn = TweenService:Create(cube, tweenInfoFadeIn, {Transparency = 0})
+    local tweenInfoFade = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     
-    local textTweenInfoIn = TweenInfo.new(fadeInDuration * 0.6, Enum.EasingStyle.Linear)
-    local textFadeIn = TweenService:Create(pleaseWaitLabel, textTweenInfoIn, {TextTransparency = 0})
+    local square1FadeIn = TweenService:Create(square1, tweenInfoFade, {BackgroundTransparency = 0})
+    local square2FadeIn = TweenService:Create(square2, tweenInfoFade, {BackgroundTransparency = 0})
+    local cubeFadeIn = TweenService:Create(cube, tweenInfoFade, {Transparency = 0})
     
-    local textGlitchConnection
-    local function playTextGlitchIn()
-        local originalPos = pleaseWaitLabel.Position
-        local jitterAmount = 2
-        local jitterDuration = 0.05
-        local numJitters = 3
-
-        for i=1, numJitters do
-            local randomX = math.random(-jitterAmount, jitterAmount)
-            local randomY = math.random(-jitterAmount, jitterAmount)
-            TweenService:Create(pleaseWaitLabel, TweenInfo.new(jitterDuration/2), {Position = originalPos + UDim2.fromOffset(randomX, randomY)}):Play()
-            task.wait(jitterDuration/2)
-            TweenService:Create(pleaseWaitLabel, TweenInfo.new(jitterDuration/2), {Position = originalPos}):Play()
-            if i < numJitters then task.wait(jitterDuration/2) end
-        end
-    end
-
     square1FadeIn:Play()
     square2FadeIn:Play()
     cubeFadeIn:Play()
-
-    task.delay(textFadeInDelay, function()
-        if pleaseWaitLabel and pleaseWaitLabel.Parent then
-            textFadeIn:Play()
-            playTextGlitchIn()
-        end
-    end)
     
-    cubeFadeIn.Completed:Wait() 
-    task.wait(holdDuration)
+    square1FadeIn.Completed:Wait()
 
-    local tweenInfoFadeOut = TweenInfo.new(fadeOutDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    task.wait(SplashTime)
+
+    local tweenInfoFadeOut = TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
     local square1FadeOut = TweenService:Create(square1, tweenInfoFadeOut, {BackgroundTransparency = 1})
     local square2FadeOut = TweenService:Create(square2, tweenInfoFadeOut, {BackgroundTransparency = 1})
     local cubeFadeOut = TweenService:Create(cube, tweenInfoFadeOut, {Transparency = 1})
-    
-    local textTweenInfoOut = TweenInfo.new(fadeOutDuration * 0.8, Enum.EasingStyle.Linear) -- Slightly faster fade out for text
-    local textFadeOut = TweenService:Create(pleaseWaitLabel, textTweenInfoOut, {TextTransparency = 1})
 
     square1FadeOut:Play()
     square2FadeOut:Play()
     cubeFadeOut:Play()
-    if pleaseWaitLabel and pleaseWaitLabel.Parent then
-        textFadeOut:Play()
-    end
 
-    cubeFadeOut.Completed:Wait() 
+    square1FadeOut.Completed:Wait()
     
     if cubeRotationConnection then cubeRotationConnection:Disconnect(); cubeRotationConnection = nil end
     if splashScreenGui and splashScreenGui.Parent then splashScreenGui:Destroy() end
