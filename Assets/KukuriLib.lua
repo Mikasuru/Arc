@@ -377,70 +377,50 @@ function KukuriLib:CreateWindow(title, subtitle)
         self.ScreenGui.Enabled = true
         self.MainFrame.Visible = true
         self.MainFrame.BackgroundTransparency = 1
-        self.MainFrame.Size = UDim2.new(0, 10, 0, 10)
+        self.MainFrame.Size = UDim2.new(0, 30, 0, 30)
+        self.MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         self.MainFrame.Rotation = 0
-        self.MainFrame.BorderSizePixel = 0
     
-        local openDuration = 0.6
-        local numParticles = 20
+        local openDuration = 0.4
+        local particleCount = 12
+        local particleColor = Color3.fromRGB(100, 255, 100)
     
-        local glitchBorder = Instance.new("UIStroke")
-        glitchBorder.Color = Color3.fromRGB(0, 255, 150)
-        glitchBorder.Thickness = 2
-        glitchBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        glitchBorder.Transparency = 0.5
-        glitchBorder.Parent = self.MainFrame
+        local slices = {}
+        for i = 1, particleCount do
+            local slice = Instance.new("Frame")
+            slice.Size = UDim2.new(0, math.random(20, 60), 0, 2)
+            slice.AnchorPoint = Vector2.new(0.5, 0.5)
+            slice.Position = UDim2.new(math.random(), 0, math.random(), 0)
+            slice.BackgroundColor3 = particleColor
+            slice.BackgroundTransparency = 0.2
+            slice.BorderSizePixel = 0
+            slice.Rotation = math.random(-30, 30)
+            slice.ZIndex = 10
+            slice.Parent = self.MainFrame
+            table.insert(slices, slice)
     
-        local glitchAnim
-        glitchAnim = game:GetService("RunService").RenderStepped:Connect(function()
-            glitchBorder.Thickness = 2 + math.random()
-            glitchBorder.Transparency = 0.4 + math.random() * 0.2
-            glitchBorder.Color = Color3.fromRGB(0, 255 - math.random(0, 50), 150 + math.random(0, 50))
-        end)
-    
-        local tweenMain = TweenService:Create(self.MainFrame, TweenInfo.new(openDuration, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 650, 0, 450),
-            BackgroundTransparency = 0,
-            Rotation = math.random(-10, 10)
-        })
-        tweenMain:Play()
-    
-        local particles = {}
-        for i = 1, numParticles do
-            local p = Instance.new("Frame")
-            p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(10, 20))
-            p.Position = UDim2.new(0.5, 0, 0.5, 0)
-            p.AnchorPoint = Vector2.new(0.5, 0.5)
-            p.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-            p.BackgroundTransparency = 0
-            p.Rotation = math.random(0, 360)
-            p.BorderSizePixel = 0
-            p.Parent = self.MainFrame
-            table.insert(particles, p)
-    
-            local offsetX = math.random(-300, 300)
-            local offsetY = math.random(-200, 200)
-            local tween = TweenService:Create(p, TweenInfo.new(0.4, Enum.EasingStyle.Linear), {
-                Position = UDim2.new(0.5, offsetX, 0.5, offsetY),
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, 1, 0, 1),
-                Rotation = p.Rotation + math.random(-180, 180)
+            local sliceTween = TweenService:Create(slice, TweenInfo.new(0.3, Enum.EasingStyle.Linear), {
+                Position = UDim2.new(slice.Position.X.Scale + math.random(-1,1), 0, slice.Position.Y.Scale + math.random(-1,1), 0),
+                BackgroundTransparency = 1
             })
-    
-            task.delay(math.random() * 0.3, function()
-                tween:Play()
+            task.delay(math.random() * 0.15, function()
+                sliceTween:Play()
             end)
         end
     
+        local tweenMain = TweenService:Create(self.MainFrame, TweenInfo.new(openDuration, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 650, 0, 450),
+            BackgroundTransparency = 0,
+            Rotation = math.random(-3, 3)
+        })
+        tweenMain:Play()
+    
         tweenMain.Completed:Connect(function()
             self.MainFrame.Rotation = 0
-            glitchAnim:Disconnect()
-            glitchBorder:Destroy()
-    
-            for _, p in ipairs(particles) do
+            for _, p in ipairs(slices) do
                 p:Destroy()
             end
-    
             self.IsAnimating = false
             self.IsOpened = true
             if callback then task.spawn(callback) end
