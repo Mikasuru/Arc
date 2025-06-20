@@ -1,11 +1,14 @@
 [Version]
+1.2.3
+[Desc]
+Added Keybind for Aim Mode
+Added Show/Disable Splash Screen
+Added No Block Animation
+Optimized the script
+
+[Version]
 1.2.2-b4
 [Desc]
 (Check in Misc)
 Added Rejoin Button
 Added Join by JobId
-
-[Version]
-1.2.2-b3
-[Desc]
-Improved performance (Might take a little bit to load)
